@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Fiji WebVR with A-Frame</title>
+    <meta name="description" content="Fiji WebVR with A-Frame">
+    <script src="js/aframe.min.js"></script>
+    <link rel="stylesheet" href="css/animate.css" />
+    <link rel="stylesheet" href="css/style.css" />
+
+</head>
+
+<body>
+    <a-scene>
+        <!--<a-scene vr-mode-ui="enabled: false">-->
+
+        <!-- preload assets -->
+        <a-assets>
+            <img id="pano" src="assets/panorama.jpg">
+            <img id="fiji" src="assets/fiji.png">
+            <img id="visitor" src="assets/visitor.png">
+            <img id="top10" src="assets/top10.png">
+            <img id="dest" src="assets/destinations.png">
+            <img id="resort" src="assets/resorts.png">
+            <img id="attract" src="assets/attract.png">
+            <a-asset-item id="platform" src="assets/platform.dae"></a-asset-item>
+        </a-assets>
+
+        <!-- Front -->
+
+        <a-image id="flogo" src="#fiji" width="10" height="10" position="0 0 -35" rotation="0 3 0" scale="0 0 0">
+            <a-animation attribute="scale" from="0 0 0" to="0.9 0.9 0.9" begin="450" easing="ease-in-out-elastic"></a-animation>
+        </a-image>
+        <a-image id="visit" src="#visitor" width="10" height="2.7" position="0 -0.1 -1" rotation="-15 8 0" scale="0 0 0">
+            <a-animation attribute="scale" from="0 0 0" to="0.1 0.1 0.1" begin="850" easing="ease-in-out-elastic"></a-animation>
+        </a-image>
+
+
+        <!-- Left -->
+
+        <a-image id="destinations" src="#dest" width="20" height="7" position="-8 0.5 0" rotation="0 90 0" scale="0.3 0.3 0.3"></a-image>
+
+        <a-image id="resorts" src="#resort" width="20" height="7" position="-5 -1 0" rotation="0 90 0" scale="0 0 0">
+            <a-animation attribute="scale" begin="spiner" to="0.3 0.3 0.3" easing="ease-in-out-elastic"></a-animation>
+            <a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>
+        </a-image>
+
+        <!-- Right -->
+        <a-image id="attractions" src="#attract" width="20" height="7" position="8 0.5 0" rotation="0 -90 0" scale="0.3 0.3 0.3"></a-image>
+
+        <!-- Ground -->
+        <a-collada-model src="#platform" position="0 -0.95 0"></a-collada-model>
+
+        <!-- Back -->
+        <a-image id="lp" src="#top10" width="5" height="5" position="0 0 3" scale="0.2 0.2 0.2" rotation="0 180 0"></a-image>
+
+        <!-- lights/sky/camera -->
+        <a-light type="spot" color="#333" position="-20 0 0"></a-light>
+        <a-light type="point" color="#AAA" position="0 5 0"></a-light>
+
+        <a-sky src="#pano"></a-sky>
+
+        <a-camera position="0 0 0">
+            <a-cursor color="#fff"></a-cursor>
+        </a-camera>
+    </a-scene>
+
+    <div id="info" class="panel hidden animated">
+        <div class="head">
+            <a href="#" onclick="fade();">&#9776;</a>
+            <h2>Attractions</h2>
+        </div>
+        <p>Phasellus a est nec velit dictum lobortis eu eu lacus. Suspendisse scelerisque mi urna, in mattis metus tincidunt vitae. Maecenas rutrum sem scelerisque magna bibendum, nec pellentesque felis aliquet. </p>
+
+    </div>
+
+
+    <script>
+        var dest = document.querySelector('#destinations');
+        var resort = document.querySelector('#resorts');
+        dest.addEventListener('click', function () {
+            resort.emit('spiner');
+        });
+        resort.addEventListener('click', function () {
+            resort.emit('shrink');
+        });
+
+        var lp = document.querySelector('#lp');
+        lp.addEventListener('click', function () {
+            window.location.assign("https://www.lonelyplanet.com/fiji");
+        });
+
+        var at = document.querySelector('#attractions');
+        var change = document.getElementById('info');
+        at.addEventListener('click', function () {
+            change.classList.remove('hidden');
+            change.classList.remove('bounceOutLeft');
+            change.classList.add('bounceInLeft');
+        });
+
+        function fade() {
+            change.classList.remove('bounceInLeft');
+            change.classList.add('bounceOutLeft');
+        }
+    </script>
+</body>
+
+</html>
