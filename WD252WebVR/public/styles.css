@@ -1,0 +1,107 @@
+@charset "UTF-8";
+/* CSS Document */
+
+*{
+	-webkit-transform: translateZ(0);
+	/*-webkit-perspective: 1000;*/
+	/*-webkit-backface-visibility: hidden;*/
+}
+
+html{
+	height:100%;
+	width:100%;
+	background-color:rgb(245,245,245);
+	background-position:center 0px;
+	background-size:100%;
+	font-family: 'Open Sans', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6{
+	font-family: 'Open Sans', sans-serif;
+}
+
+body{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:12pt;
+	margin:0px;
+	background-attachment: scroll;
+	background-repeat: repeat-y;
+	width:100%;
+	height:100%;
+	color: white;
+
+	background: #355582; /* Old browsers */
+	background: -moz-linear-gradient(top,  #355582 1%, #253b5b 97%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top,  #355582 1%,#253b5b 97%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom,  #355582 1%,#253b5b 97%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#355582', endColorstr='#253b5b',GradientType=0 ); /* IE6-9 */
+
+}
+
+#recordingCard{
+	background:white;
+	box-shadow: 0 0 10px black;
+	z-index: 100000;
+	position: fixed;
+	top: 0;
+	left: 0;
+	opacity: 0.5;
+}
+
+body.login{
+	display: flex;
+	align-items: center;
+	align-content: center;
+	justify-content: center;
+	flex-direction: column;
+}
+
+body.login h1, body.login span{
+	text-shadow: 0 2px 3px black;
+}
+
+body.login h1{
+	margin-bottom: 5px;
+}
+
+body.login span{
+	margin-bottom: 20px;
+}
+
+body.login form{
+	width: 300px;
+    background: white;
+	padding: 10px;
+	display: flex;
+	flex-direction: column;
+	box-shadow: 0 5px 15px black;
+	border-radius: 5px;
+	margin-bottom: 65px;
+	min-height: 155px;
+}
+
+
+body.login form input, body.login form button{
+	margin-bottom: 10px;
+    font-size: 1.4em;
+    border: 0;
+    border-radius: 3px;
+    padding: 0.3em;
+	outline: none;	
+}
+
+body.login form input{
+	border: 1px solid #b5b5b5;
+}
+
+body.login form button{
+	background-color: #60e25a;
+	color: white;
+}
+
+*[data-identifier]{
+	/*position: fixed;*/
+	/*left: 100%;*/
+	/*top: 100%;*/
+	opacity: 0;
+}
