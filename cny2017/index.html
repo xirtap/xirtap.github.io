@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>CNY WebVR from Patrick</title>
+    <meta name="description" content="CNY WebVR from Patrick">
+    <script src="js/aframe.min.js"></script>
+    <link rel="stylesheet" href="css/animate.css" />
+    <link rel="stylesheet" href="css/style.css" />
+
+</head>
+
+<body>
+    <a-scene>
+        <!--<a-scene vr-mode-ui="enabled: false">-->
+
+        <!-- preload assets -->
+        <a-assets>
+            <img id="pano" src="assets/panorama.jpg">
+            <img id="cny" src="assets/CNY.png">
+            <img id="tcouplet" src="assets/bubugaoshen.png">
+            <img id="bcouplet" src="assets/shuishuipingan.png">
+            <img id="rcouplet" src="assets/wanshiruyi.png">
+            <a-asset-item id="platform" src="assets/platform.dae"></a-asset-item>
+        </a-assets>
+
+        <!-- Front -->
+        <a-image id="cnys" src="#cny" width="10" height="4" position="0 0.35 -1" rotation="0 0 0" scale="0 0 0">
+            <a-animation attribute="scale" from="0 0 0" to="0.15 0.15 0.15" begin="2000" easing="ease-in-out-elastic"></a-animation>
+        </a-image>
+        
+        
+        <a-collada-model id="rrights" src="#platform" position="2 -1 0.2" scale="0.2 0.2 0.2" rotation="0 250 0"></a-collada-model>
+
+        <a-image id="rcouplets" src="#rcouplet" width="15" height="17" position="1.5 -0.6 -0.1" rotation="-20 -90 -1" scale="0 0 0">
+            <a-animation attribute="scale" begin="spiner" to="0.1 0.1 0.1" easing="ease-in-out-elastic"></a-animation>
+            <a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>
+        </a-image>
+
+        <!-- Ground -->
+        <a-collada-model id="rbelows" src="#platform" position="-0.25 -0.85 0.1" scale="0.12 0.12 0.12" rotation="30 250 0"></a-collada-model>
+
+        <a-image id="bcouplets" src="#bcouplet" width="15" height="17" position="-0.25 -0.85 0.1" rotation="-80 90 -1" scale="0 0 0">
+            <a-animation attribute="scale" begin="spiner" to="0.05 0.05 0.05" easing="ease-in-out-elastic"></a-animation>
+            <a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>
+        </a-image>
+
+        <!-- Back -->
+        <a-collada-model id="rtops" src="#platform" position="0.1 1.45 2" scale="0.08 0.08 0.08" rotation="-30 0 0"></a-collada-model>
+
+        <a-image id="tcouplets" src="#tcouplet" width="15" height="17" position="0.1 1.45 2" rotation="30 180 -1" scale="0 0 0">
+            <a-animation attribute="scale" begin="spiner" to="0.15 0.15 0.15" easing="ease-in-out-elastic"></a-animation>
+            <a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>
+        </a-image>
+
+        <a-light type="point" color="#fd1" position="0 5 0"></a-light>
+        <a-light type="point" color="#fd1" position="0.1 1.4 1"></a-light>
+        
+        <a-sky src="#pano"></a-sky>
+
+        <a-camera position="0 0 0">
+            <a-cursor color="#fff"></a-cursor>
+        </a-camera>
+    </a-scene>
+
+
+    <script>
+        var rright = document.querySelector('#rrights');
+        var rcouplet = document.querySelector('#rcouplets');
+        rright.addEventListener('click', function () {
+            rcouplet.emit('spiner');
+        });
+        rcouplet.addEventListener('click', function () {
+            rcouplet.emit('shrink');
+        });
+
+        var rbelow = document.querySelector('#rbelows');
+        var bcouplet = document.querySelector('#bcouplets');
+        rbelow.addEventListener('click', function () {
+            bcouplet.emit('spiner');
+        });
+        bcouplet.addEventListener('click', function () {
+            bcouplet.emit('shrink');
+        });
+
+
+        var rtop = document.querySelector('#rtops');
+        var tcouplet = document.querySelector('#tcouplets');
+        rtop.addEventListener('click', function () {
+            tcouplet.emit('spiner');
+        });
+        tcouplet.addEventListener('click', function () {
+            tcouplet.emit('shrink');
+        });
+
+        var homepg = document.querySelector('#cnys');
+        homepg.addEventListener('click', function () {
+            window.location.assign("http://patrix.comeze.com");
+        });
+
+    </script>
+</body>
+
+</html>
