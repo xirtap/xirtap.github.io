@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Fiji WebVR with A-Frame</title>
+    <meta name="description" content="Fiji WebVR with A-Frame">
+    <script src="js/aframe.min.js"></script>
+    <link rel="stylesheet" href="css/animate.css" />
+    <link rel="stylesheet" href="css/style.css" />
+
+</head>
+
+<body>
+    <a-scene>
+        <!--<a-scene vr-mode-ui="enabled: false">-->
+
+        <!-- preload assets -->
+        <a-assets>
+            <img id="pano" src="assets/panorama.jpg">
+            <img id="ship" src="assets/ship.jpg">
+            <img id="cabin" src="assets/cabin.jpg">
+            <img id="balcony" src="assets/balcony.jpg">
+            <img id="sundeck" src="assets/sundeck.jpg">
+            <img id="chapel" src="assets/chapel.jpg">
+            <!-- a-asset-item id="platform" src="assets/model.dae"></a-asset-item -->
+        </a-assets>
+
+        <!-- Front -->
+
+        <a-image id="flogo" src="#ship" width="10" height="10" position="0.7 -3 0" rotation="-90 0 0" scale="0 0 0">
+            <a-animation attribute="scale" from="0 0 0" to="0.3 0.2 0.1" begin="450" easing="ease-in-out-elastic"></a-animation>
+        </a-image>
+
+        <!-- Left -->
+
+        <a-image id="room" src="#cabin" width="20" height="7" position="1 2.5 -1" rotation="-90 180 0" scale="0.05 0.1 0.1"></a-image>
+
+        <a-image id="church" src="#chapel" width="20" height="7" position="1 2.5 -2" rotation="-90 180 0" scale="0.05 0.1 0.1"></a-image>
+
+        <a-image id="seaview" src="#balcony" width="20" height="7" position="-0.5 2.5 -1" rotation="90 0 0" scale="0.05 0.1 0.1"></a-image>
+
+        <a-image id="upperdeck" src="#sundeck" width="20" height="7" position="-0.5 2.5 -2" rotation="90 0 0" scale="0.05 0.1 0.1"></a-image>
+
+        <!-- Ground -->
+        <!-- a-collada-model id="lp" src="#platform" position="0.7 -0.5 0.9" scale="0.2 0.2 0.2" rotation="0 60 0"></a-collada-model -->
+
+        <!-- lights/sky/camera -->
+        <a-light type="spot" color="#fd1" position="-20 0 0" ></a-light>
+        <a-light type="point" color="#fd1" position="0 5 0"></a-light>
+
+        <a-sky src="#pano"></a-sky>
+
+        <a-camera position="0 0 0">
+            <a-cursor color="#fff"></a-cursor>
+        </a-camera>
+    </a-scene>
+
+    <script>
+        var rm = document.querySelector('#room');
+        rm.addEventListener('click', function () {
+            window.location.assign("https://www.lonelyplanet.com/fiji");
+        });
+   
+    </script>
+</body>
+
+</html>
