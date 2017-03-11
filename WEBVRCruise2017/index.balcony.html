@@ -27,12 +27,16 @@
         </a-assets>
 
         <a-image id="room" src="#cabin" width="20" height="7" position="1.5 2.5 -1" rotation="90 0 0" scale="0.05 0.1 0.1"></a-image>
+        <a-image id="room2" src="#cabin" width="20" height="7" position="1.5 -2.5 -1" rotation="-90 0 0" scale="0.05 0.1 0.1"></a-image>
 
         <a-image id="church" src="#chapel" width="20" height="7" position="0.8 2.5 -1.8" rotation="90 0 0" scale="0.05 0.1 0.1"></a-image>
+        <a-image id="church2" src="#chapel" width="20" height="7" position="0.8 -2.5 -1.8" rotation="-90 0 0" scale="0.05 0.1 0.1"></a-image>
 
         <a-image id="seaview" src="#balcony" width="20" height="7" position="-1.5 2.5 -1" rotation="90 0 0" scale="0.05 0.1 0.1"></a-image>
+        <a-image id="seaview2" src="#balcony" width="20" height="7" position="-1.5 -2.5 -1" rotation="-90 0 0" scale="0.05 0.1 0.1"></a-image>
 
         <a-image id="upperdeck" src="#sundeck" width="20" height="7" position="-0.7 2.5 -1.8" rotation="90 0 0" scale="0.05 0.1 0.1"></a-image>
+        <a-image id="upperdeck2" src="#sundeck" width="20" height="7" position="-0.7 -2.5 -1.8" rotation="-90 0 0" scale="0.05 0.1 0.1"></a-image>
 
         <!-- Ground -->
         <!-- a-collada-model id="lp" src="#platform" position="0.7 -0.5 0.9" scale="0.2 0.2 0.2" rotation="0 60 0"></a-collada-model -->
@@ -53,9 +57,19 @@
         rm.addEventListener('click', function () {
             window.location.assign("https://xirtap.github.io/WEBVRCruise2017/index.cabin.html");
         });
+        
+        var rm2 = document.querySelector('#room2');
+        rm2.addEventListener('click', function () {
+            window.location.assign("https://xirtap.github.io/WEBVRCruise2017/index.cabin.html");
+        });
 
         var ch = document.querySelector('#church');
         ch.addEventListener('click', function () {
+            window.location.assign("https://xirtap.github.io/WEBVRCruise2017/index.chapel.html");
+        });
+
+        var ch2 = document.querySelector('#church2');
+        ch2.addEventListener('click', function () {
             window.location.assign("https://xirtap.github.io/WEBVRCruise2017/index.chapel.html");
         });
 
@@ -64,8 +78,18 @@
             window.location.assign("https://xirtap.github.io/WEBVRCruise2017/index.balcony.html");
         });
 
+        var se2 = document.querySelector('#seaview2');
+        se2.addEventListener('click', function () {
+            window.location.assign("https://xirtap.github.io/WEBVRCruise2017/index.balcony.html");
+        });
+
         var sd = document.querySelector('#upperdeck');
         sd.addEventListener('click', function () {
+            window.location.assign("https://xirtap.github.io/WEBVRCruise2017/index.sundeck.html");
+        });
+
+        var sd2 = document.querySelector('#upperdeck2');
+        sd2.addEventListener('click', function () {
             window.location.assign("https://xirtap.github.io/WEBVRCruise2017/index.sundeck.html");
         });
     
