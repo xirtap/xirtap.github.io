@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Web Designer Aquarelle Turotial</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <script src="js/three.min.js"></script>
+    <script src="js/Aquarelle.js"></script>
+    <script src="js/EffectComposer.js"></script>
+    <script src="js/ClearPass.js"></script>
+    <script src="js/AquarellePass.js"></script>
+    <script src="js/ShaderPass.js"></script>
+    <script src="js/CopyShader.js"></script>
+    <script src="https://bl.ocks.org/mbostock/raw/4241134/d3.geom.contour.min.js"></script>
+
+    <div class="fade">
+        <img id="watercolor" src="img/painting.jpg">
+        <div class="top">
+            <div class="logo"></div>
+            <div class="menu">&#9776; </div>
+        </div>
+        <div class="buttons">
+            <div class="icon"></div>
+        </div>
+        <div class="title">
+            <h2>Patrick Lim</h2>
+        </div>
+    </div>
+
+    <div id="content">
+        <container>
+            <h2>Simple step by step guide</h2>
+            <img src="img/steps.png" alt="easy as 1, 2, 3">
+            <a href="#">SIGN UP</a>
+        </container>
+    </div>
+    <footer>
+        <p>&copy; 2017 Web Designer Magazine</p>
+    </footer>
+
+    <script>
+        var fade = document.querySelector('.fade');
+        var topNav = document.querySelector('.top');
+        var title = document.querySelector('.title');
+        var icon = document.querySelector('.icon');
+        var image = document.getElementById('watercolor');
+        var aquarelle = new Aquarelle(image, 'img/mask.png', {
+            fromAmplitude: 8,
+            toAmplitude: 0,
+            fromFrequency: 8,
+            toFrequency: 3,
+            autoplay: true,
+            loop: false,
+            toOffset: 50
+        });
+        aquarelle.addEventListener('created', function() {
+            fade.style.opacity = '1';
+            var canvas = this.getCanvas();
+            canvas.removeAttribute('style');
+            image.parentNode.insertBefore(canvas, image.nextSibling);
+            image.parentNode.removeChild(image);
+        });
+        aquarelle.addEventListener('changed', function(event) {
+            topNav.style.opacity = this.transitionInRange(0, 1, 5000, 8000);
+            var canvas = this.getCanvas();
+            canvas.style.webkitTransform = canvas.style.transform = 'translate(-50%, -50%) scale(' + this.transitionInRange(.75, 1) + ')';
+            title.style.opacity = this.transitionInRange(0, 1, 0, 2500);
+            title.style.webkitTransform = title.style.transform = 'scale(' + this.transitionInRange(.8, 1, 0, 4500) + ')';
+            icon.style.webkitFilter = 'blur(' + event.target.transitionInRange(4, 0, 3500, 4500) + 'px)';
+            icon.style.opacity = event.target.transitionInRange(0, 1, 3500, 4500);
+            icon.style.webkitTransform = icon.style.transform = 'scale(' + event.target.transitionInRange(1.5, 1, 3500, 5000) + ')';
+        });
+
+    </script>
+</body>
+
+</html>
