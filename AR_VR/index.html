@@ -40,11 +40,11 @@
         var arToolkitContext, onRenderFcts, arToolkitSource, markerRoot, artoolkitMarker, lastTimeMsec;
         var model, tube1, tube2, mid, details, pulse;
         var loader = new THREE.ColladaLoader();
-        loader.load('model/scene.dae', function(collada) {
+        loader.load('model/model.dae', function(collada) {
 
             model = collada.scene;
             model.scale.x = model.scale.y = model.scale.z = 0.1;
-
+/*
             details = model.getObjectByName("details", true);
 
             tube1 = model.getObjectByName("tube1", true);
@@ -66,7 +66,7 @@
             b.transparent = true;
             b.blending = THREE["AdditiveBlending"];
             b.opacity = 0.9;
-
+*/
             init();
 
         });
@@ -136,18 +136,18 @@
             scene.add(markerRoot)
             artoolkitMarker = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
                 type: 'pattern',
-                patternUrl: 'data/patt.hiro'
+                patternUrl: 'data/patrick.patt'
             });
 
             //////// Add object to scene via the marker /////////
             markerRoot.add(model);
 
-            onRenderFcts.push(function() {
+            /* onRenderFcts.push(function() {
                 tube1.rotation.y -= 0.01;
                 tube2.rotation.y += 0.005;
                 mid.rotation.y -= 0.008;
                 details.position.y = (5 + 3 * Math.sin(1.2 * pulse));
-            });
+            });*/
 
 
             // render the scene
@@ -157,7 +157,7 @@
             // run the rendering loop
             lastTimeMsec = null;
 
-            animate();
+            //animate();
 
         }
 
