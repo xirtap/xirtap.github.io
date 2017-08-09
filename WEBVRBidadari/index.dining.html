@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Patrick's Bidadari HDB WebVR</title>
+    <meta name="description" content="Bidadari HDB 3 Room">
+    <script src="js/aframe.min.js"></script>
+    <link rel="stylesheet" href="css/animate.css" />
+    <link rel="stylesheet" href="css/style.css" />
+
+</head>
+
+<body>
+    <a-scene>
+        <!--<a-scene vr-mode-ui="enabled: false">-->
+
+        <!-- preload assets -->
+        <a-assets>
+            <img id="pano" src="asset/DiningArea.png">
+            <img id="living" src="asset/Ptr.png">
+            <img id="bedroom" src="asset/Ptr.png">
+            <img id="study" src="asset/Ptr.png">
+            <img id="toilet" src="asset/Ptr.png">
+            <img id="kitchen" src="asset/Ptr.png">
+            
+            <!-- a-asset-item id="platform" src="assets/model.dae"></a-asset-item -->
+        </a-assets>
+
+        <a-image id="Livingr" src="#living" width="8" height="10" position="0 0 -1.1" rotation="0 0 0" scale="0.01 0.01 0.01"></a-image>
+        <a-image id="Bedr" src="#bedroom" width="8" height="10" position="1.6 0 -0.5" rotation="0 110 0" scale="0.02 0.02 0.02"></a-image>
+        <a-image id="Studyr" src="#study" width="6" height="8" position="-0.7 0 -0.45" rotation="0 -110 0" scale="0.01 0.01 0.01"></a-image>
+        <a-image id="Toilet" src="#toilet" width="8" height="10" position="-1.9 0 -0.35" rotation="0 -90 0" scale="0.015 0.015 0.015"></a-image>
+        <a-image id="Kitchen" src="#kitchen" width="8" height="10" position="-1.8 0 1.5" rotation="0 -210 0" scale="0.02 0.02 0.02"></a-image>        
+        
+        <!-- Ground -->
+        <!-- a-collada-model id="lp" src="#platform" position="0.7 -0.5 0.9" scale="0.2 0.2 0.2" rotation="0 60 0"></a-collada-model -->
+
+        <!-- lights/sky/camera -->
+        <a-light type="spot" color="#fd1" position="-20 0 0" ></a-light>
+        <a-light type="point" color="#fd1" position="0 5 0"></a-light>
+
+        <a-sky src="#pano"></a-sky>
+
+        <a-camera position="0 0 0">
+            <a-cursor color="#fff"></a-cursor>
+        </a-camera>
+    </a-scene>
+
+    <script>
+        var rm = document.querySelector('#Livingr');
+        rm.addEventListener('click', function () {
+            window.location.assign("https://xirtap.github.io/WEBVRBidadari/index.livingrm.html");
+        });
+
+        var ch = document.querySelector('#Bedr');
+        ch.addEventListener('click', function () {
+            window.location.assign("https://xirtap.github.io/WEBVRBidadari/index.bedrm.html");
+        });
+
+        var ch = document.querySelector('#Studyr');
+        ch.addEventListener('click', function () {
+            window.location.assign("https://xirtap.github.io/WEBVRBidadari/index.studyrm.html");
+        });
+
+        var ch = document.querySelector('#Toilet');
+        ch.addEventListener('click', function () {
+            window.location.assign("https://xirtap.github.io/WEBVRBidadari/index.toilet.html");
+        });
+
+        var ch = document.querySelector('#Kitchen');
+        ch.addEventListener('click', function () {
+            window.location.assign("https://xirtap.github.io/WEBVRBidadari/index.kitchen.html");
+        });        
+   </script>
+</body>
+
+</html>
