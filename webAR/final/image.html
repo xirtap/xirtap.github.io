@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR</title>
+    <script src="js/aframe-master.min.js"></script>
+    <script src="js/aframe-ar.min.js"></script>
+    <style>
+        body{
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <a-scene embedded artoolkit='sourceType: webcam;'>
+        <a-assets>
+            <img id="itinerary" src="assets/fwt.png">
+        </a-assets>
+
+        <a-image src="#itinerary" width="2" height="2" position="0 1 0" rotation="-90 0 0"></a-image>
+
+        <a-marker-camera preset='hiro'></a-marker-camera>
+    </a-scene>
+</body>
+
+</html>

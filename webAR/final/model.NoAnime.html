@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR</title>
+    <script src="js/aframe-master.min.js"></script>
+    <script src="js/aframe-ar.min.js"></script>
+    <style>
+        body{
+            overflow: hidden;
+        }
+        .a-enter-vr.embedded{
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <a-scene embedded artoolkit='sourceType: webcam;'>
+        <a-assets>
+            <a-asset-item id="scene" src="assets/galileo3.dae"></a-asset-item>
+        </a-assets>
+
+        <a-entity position="0 0 0">
+            <a-collada-model src="#scene" scale="2 2 2">
+            </a-collada-model>
+        </a-entity>
+        
+        <a-light type="point" color="#f0fcff" position="4 4 0"></a-light>
+
+        <a-marker-camera preset='hiro'></a-marker-camera>
+    </a-scene>
+</body>
+
+</html>
