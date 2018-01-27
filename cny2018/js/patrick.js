@@ -102,26 +102,26 @@ document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing=
 //Bottom 4
 document.write('<a-image id="cf9" src="#coin" width="5" height="5" position="0 -2 -1.5" rotation="-60 0 0" scale="0.2 0.2 0.2"></a-image>');
 document.write('<a-image id="zc09" src="#z9" width="2" height="2" position="0 -1.5 -1" rotation="-60 0 0" scale="0.5 0.5 0.5">');
-//document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
-//document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
+document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
+document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
 
 document.write('<a-image id="cf10" src="#coin" width="5" height="5" position="2 -2.3 0" rotation="60 90 0" scale="0.2 0.2 0.2"></a-image>');
 document.write('<a-image id="zc10" src="#z10" width="2" height="2" position="1.5 -1.8 0" rotation="60 90 0" scale="0.5 0.5 0.5">');
-//document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
-//document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
+document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
+document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
 
 document.write('<a-image id="cf11" src="#coin" width="5" height="5" position="0 -2 1.5" rotation="60 0 0" scale="0.2 0.2 0.2"></a-image>');
 document.write('<a-image id="zc11" src="#z11" width="2" height="2" position="0 -1.5 1" rotation="60 0 0" scale="0.5 0.5 0.5">');
-//document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
-//document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
+document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
+document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
 
 document.write('<a-image id="cf12" src="#coin" width="5" height="5" position="-2 -2.3 0" rotation="60 -90 0" scale="0.2 0.2 0.2"></a-image>');
 document.write('<a-image id="zc12" src="#z12" width="2" height="2" position="-1.5 -1.8 0" rotation="60 -90 0" scale="0.5 0.5 0.5">');
-//document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
-//document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
+document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
+document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
 
 
@@ -129,6 +129,7 @@ function chk(x){
     if (parseInt(tempArray[x]) != found+1)
     {        
         //alert("Unmatch:"+tempArray[x]+":"+found);
+        found=0;
         setTimeout(fadeall, 1000)
     }
     else
