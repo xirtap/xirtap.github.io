@@ -151,7 +151,7 @@ function chk(x){
     }
     else if (parseInt(tempArray[x]) == found)
     {
-        alert("Yay! You found the doggie pair!);
+        alert("Yay! You found the doggie pair!");
     }
     else
     {
