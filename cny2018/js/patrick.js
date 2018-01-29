@@ -128,7 +128,7 @@ document.write('</a-image>');
 
 document.write('<a-image id="cf12" src="#coin" width="5" height="5" position="-2 -2.3 0" rotation="-60 90 0" scale="0.2 0.2 0.2"></a-image>');
 // document.write('<a-image id="zc12" src="#z12" width="2" height="2" position="-1.5 -1.8 0" rotation="-60 90 0" scale="1 1 1">');
-document.write('<a-image id="zc12" src="#z12" width="2" height="2" position="-2 -1 0" rotation="0 90 0" scale="0.5 0.5 0.5">');
+document.write('<a-image id="zc12" src="#z8" width="2" height="2" position="-1.5 -1.8 0" rotation="-60 90 0" scale="0.5 0.5 0.5">');
 document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
 document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
