@@ -102,11 +102,18 @@ document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" e
 document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
 
-document.write('<a-image id="cf8" src="#coin" width="5" height="5" position="-2 0 -1.5" rotation="0 90 0" scale="0.2 0.2 0.2"></a-image>');
-document.write('<a-image id="zc08" src="#z8" width="2" height="2" position="-1.5 0 -1" rotation="0 90 0" scale="0.5 0.5 0.5">');
+document.write('<a-image id="cf8" src="#coin" width="5" height="5" position="-1.5 0 2" rotation="0 180 0" scale="0.2 0.2 0.2"></a-image>');
+document.write('<a-image id="zc08" src="#z8" width="2" height="2" position="-1 0 1.5"  rotation="0 180 0" scale="0.5 0.5 0.5">');
 document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
 document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
+
+document.write('<a-image id="cf13" src="#coin" width="5" height="5" position="-2 0 -1.5" rotation="0 90 0" scale="0.2 0.2 0.2"></a-image>');
+document.write('<a-image id="zc13" src="#z13" width="2" height="2" position="-1.5 0 -1" rotation="0 90 0" scale="0.5 0.5 0.5">');
+document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
+document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
+document.write('</a-image>');
+
 
 //Bottom 4
 document.write('<a-image id="cf9" src="#coin" width="5" height="5" position="0 -2 -1.5" rotation="-60 0 0" scale="0.2 0.2 0.2"></a-image>');
@@ -136,7 +143,7 @@ document.write('</a-image>');
 
 function chk(x){
     x=x-1;
-    if (parseInt(tempArray[x]) != found)
+    if ((found > 0) && (parseInt(tempArray[x]) != found))
     {        
         //alert("Unmatch:"+tempArray[x]+":"+found);
         found=0;
@@ -144,8 +151,11 @@ function chk(x){
     }
     else
     {
-        found=parseInt(tempArray[x]);
-        //alert("match:"+tempArray[x]+":"+found);
+        alert("Yay! You found the doggie pair!:"+tempArray[x]+":"+found);
+    }
+    else
+    {
+        found=parseInt(tempArray[x]);        
     }
 }
 
