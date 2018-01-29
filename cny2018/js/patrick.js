@@ -43,7 +43,7 @@ function setZodiac(y){
 
 var opened = 0;
 var found = 0;
-var tempArray = [ '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12' ]
+var tempArray = [ '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '11','12' ]
 
 tempArray.shuffle();
 
@@ -90,20 +90,20 @@ document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" e
 document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
 
-document.write('<a-image id="cf6" src="#coin" width="5" height="5" position="2.5 0 0" rotation="0 -90 0" scale="0.2 0.2 0.2"></a-image>');
-document.write('<a-image id="zc06" src="#z6" width="2" height="2" position="2 0 0" rotation="0 -90 0" scale="0.5 0.5 0.5">');
+document.write('<a-image id="cf6" src="#coin" width="5" height="5" position="2 0 -1.5" rotation="0 -90 0" scale="0.2 0.2 0.2"></a-image>');
+document.write('<a-image id="zc06" src="#z6" width="2" height="2" position="1.5 0 -1" rotation="0 -90 0" scale="0.5 0.5 0.5">');
 document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
 document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
 
-document.write('<a-image id="cf7" src="#coin" width="5" height="5" position="0 0 2.5" rotation="0 180 0" scale="0.2 0.2 0.2"></a-image>');
-document.write('<a-image id="zc07" src="#z7" width="2" height="2" position="0 0 2" rotation="0 180 0" scale="0.5 0.5 0.5">');
+document.write('<a-image id="cf7" src="#coin" width="5" height="5" position="1.5 0 2" rotation="0 180 0" scale="0.2 0.2 0.2"></a-image>');
+document.write('<a-image id="zc07" src="#z7" width="2" height="2" position="1 0 1.5"  rotation="0 180 0" scale="0.5 0.5 0.5">');
 document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
 document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
 
-document.write('<a-image id="cf8" src="#coin" width="5" height="5" position="-2.5 0 0" rotation="0 90 0" scale="0.2 0.2 0.2"></a-image>');
-document.write('<a-image id="zc08" src="#z8" width="2" height="2" position="-2 0 0" rotation="0 90 0" scale="0.5 0.5 0.5">');
+document.write('<a-image id="cf8" src="#coin" width="5" height="5" position="-2 0 -1.5" rotation="0 90 0" scale="0.2 0.2 0.2"></a-image>');
+document.write('<a-image id="zc08" src="#z8" width="2" height="2" position="-1.5 0 -1" rotation="0 90 0" scale="0.5 0.5 0.5">');
 document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
 document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
@@ -136,7 +136,7 @@ document.write('</a-image>');
 
 function chk(x){
     x=x-1;
-    if (parseInt(tempArray[x]) != found+1)
+    if (parseInt(tempArray[x]) != found)
     {        
         //alert("Unmatch:"+tempArray[x]+":"+found);
         found=0;
