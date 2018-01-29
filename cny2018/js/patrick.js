@@ -47,7 +47,7 @@ var tempArray = [ '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '1
 
 tempArray.shuffle();
 
-for (var j = 1; j <=tempArray.length+1; j++) {
+for (var j = 1; j < tempArray.length+1; j++) {
     document.write('<a-assets><img id="z'+ j + '" src="assets/' + setZodiac(tempArray[j]) + '"></a-assets>');
    }
 
