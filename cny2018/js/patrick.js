@@ -151,7 +151,7 @@ function chk(x){
     }
     else if (parseInt(tempArray[x]) == found)
     {
-        alert("Yay! You found the doggie pair!:"+tempArray[x]+":"+found);
+        alert("Yay! You found the doggie pair!);
     }
     else
     {
@@ -244,6 +244,12 @@ cf012.addEventListener('click', function () {
     chk(12);
 }); 
 
+var cf013 = document.querySelector('#cf13');
+var zcf013 = document.querySelector('#zc13');
+cf013.addEventListener('click', function () {
+    zcf013.emit('spiner');    
+    chk(13);
+}); 
 
 function fadeall() {
     zcf001.emit('shrink');
@@ -258,5 +264,6 @@ function fadeall() {
     zcf010.emit('shrink');
     zcf011.emit('shrink');
     zcf012.emit('shrink');
+    zcf013.emit('shrink');
 }
 
