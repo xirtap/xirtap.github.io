@@ -149,7 +149,7 @@ function chk(x){
         found=0;
         setTimeout(fadeall, 1000)
     }
-    else
+    else if (parseInt(tempArray[x]) == found)
     {
         alert("Yay! You found the doggie pair!:"+tempArray[x]+":"+found);
     }
