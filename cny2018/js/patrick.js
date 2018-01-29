@@ -47,7 +47,7 @@ var tempArray = [ '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '1
 
 tempArray.shuffle();
 
-for (var j = 0; j <= tempArray.length+1; j++) {
+for (var j = 0; j <= tempArray.length; j++) {
     k=j+1;
     document.write('<a-assets><img id="z'+ k + '" src="assets/' + setZodiac(tempArray[j]) + '"></a-assets>');
    }
@@ -135,6 +135,7 @@ document.write('</a-image>');
 
 
 function chk(x){
+    x=x-1;
     if (parseInt(tempArray[x]) != found+1)
     {        
         //alert("Unmatch:"+tempArray[x]+":"+found);
