@@ -47,8 +47,9 @@ var tempArray = [ '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '1
 
 tempArray.shuffle();
 
-for (var j = 1; j < tempArray.length+1; j++) {
-    document.write('<a-assets><img id="z'+ j + '" src="assets/' + setZodiac(tempArray[j]) + '"></a-assets>');
+for (var j = 0; j <= tempArray.length; j++) {
+    k=j+1;
+    document.write('<a-assets><img id="z'+ k + '" src="assets/' + setZodiac(tempArray[j]) + '"></a-assets>');
    }
 
 // and the result is...alert(tempArray);
@@ -127,8 +128,7 @@ document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing=
 document.write('</a-image>');
 
 document.write('<a-image id="cf12" src="#coin" width="5" height="5" position="-2 -2.3 0" rotation="-60 90 0" scale="0.2 0.2 0.2"></a-image>');
-// document.write('<a-image id="zc12" src="#z12" width="2" height="2" position="-1.5 -1.8 0" rotation="-60 90 0" scale="1 1 1">');
-document.write('<a-image id="zc11" src="#z11" width="2" height="2" position="-1.5 -1.5 1" rotation="-60 90 0" scale="0.5 0.5 0.5">');
+document.write('<a-image id="zc12" src="#z12" width="2" height="2" position="-1.5 -1.8 0" rotation="-60 90 0" scale="0.5 0.5 0.5">');
 document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
 document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
