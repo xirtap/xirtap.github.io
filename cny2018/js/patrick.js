@@ -90,26 +90,26 @@ document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" e
 document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
 
-document.write('<a-image id="cf6" src="#coin" width="5" height="5" position="2 0 -1.5" rotation="0 -90 0" scale="0.2 0.2 0.2"></a-image>');
-document.write('<a-image id="zc06" src="#z6" width="2" height="2" position="1.5 0 -1" rotation="0 -90 0" scale="0 0 0">');
+document.write('<a-image id="cf6" src="#coin" width="5" height="5" position="2 0 -1.5" rotation="0 -60 0" scale="0.2 0.2 0.2"></a-image>');
+document.write('<a-image id="zc06" src="#z6" width="2" height="2" position="1.5 0 -1" rotation="0 -60 0" scale="0 0 0">');
 document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
 document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
 
-document.write('<a-image id="cf7" src="#coin" width="5" height="5" position="1.5 0 2" rotation="0 180 0" scale="0.2 0.2 0.2"></a-image>');
-document.write('<a-image id="zc07" src="#z7" width="2" height="2" position="1 0 1.5"  rotation="0 180 0" scale="0 0 0">');
+document.write('<a-image id="cf7" src="#coin" width="5" height="5" position="1.5 0 2" rotation="0 -120 0" scale="0.2 0.2 0.2"></a-image>');
+document.write('<a-image id="zc07" src="#z7" width="2" height="2" position="1 0 1.5"  rotation="0 -120 0" scale="0 0 0">');
 document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
 document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
 
-document.write('<a-image id="cf8" src="#coin" width="5" height="5" position="-1.5 0 2" rotation="0 180 0" scale="0.2 0.2 0.2"></a-image>');
-document.write('<a-image id="zc08" src="#z8" width="2" height="2" position="-1 0 1.5"  rotation="0 180 0" scale="0 0 0">');
+document.write('<a-image id="cf8" src="#coin" width="5" height="5" position="-1.5 0 2" rotation="0 120 0" scale="0.2 0.2 0.2"></a-image>');
+document.write('<a-image id="zc08" src="#z8" width="2" height="2" position="-1 0 1.5"  rotation="0 120 0" scale="0 0 0">');
 document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
 document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
 
-document.write('<a-image id="cf9" src="#coin" width="5" height="5" position="-2 0 -1.5" rotation="0 90 0" scale="0.2 0.2 0.2"></a-image>');
-document.write('<a-image id="zc09" src="#z9" width="2" height="2" position="-1.5 0 -1" rotation="0 90 0" scale="0 0 0">');
+document.write('<a-image id="cf9" src="#coin" width="5" height="5" position="-2 0 -1.5" rotation="0 60 0" scale="0.2 0.2 0.2"></a-image>');
+document.write('<a-image id="zc09" src="#z9" width="2" height="2" position="-1.5 0 -1" rotation="0 60 0" scale="0 0 0">');
 document.write('<a-animation attribute="scale" begin="spiner" to="0.5 0.5 0.5" easing="ease-in-out-elastic"></a-animation>');
 document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" easing="ease-in-out-elastic"></a-animation>');
 document.write('</a-image>');
