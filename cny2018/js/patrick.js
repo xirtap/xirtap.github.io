@@ -145,17 +145,23 @@ function chk(x){
     x=x-1;
     if ((found > 0) && (parseInt(tempArray[x]) != found))
     {        
-        //alert("Unmatch:"+tempArray[x]+":"+found);
+        alert("Unmatch:"+tempArray[x]+":"+found+":"+opened+":"+x);
         found=0;
-        setTimeout(fadeall, 1000)
+        setTimeout(fadeall(opened+1), 500)
+        setTimeout(fadeall(x+1), 500)
+        opened=0;
+        x=0;
     }
     else if (parseInt(tempArray[x]) == found)
     {
-        alert("Yay! You found the doggie pair!");
+        alert("Yay! You found the doggie pair!"+tempArray[x]+":"+found+":"+opened+":"+x);
+        found=0;
     }
     else
     {
-        found=parseInt(tempArray[x]);        
+        found=parseInt(tempArray[x]);
+        opened=x;
+        alert("Open:"+tempArray[x]+":"+found+":"+opened+":"+x);
     }
 }
 
@@ -251,8 +257,8 @@ cf013.addEventListener('click', function () {
     chk(13);
 }); 
 
-function fadeall() {
-    zcf001.emit('shrink');
+function fadeall(opn) {
+    /* zcf001.emit('shrink');
     zcf002.emit('shrink');
     zcf003.emit('shrink');
     zcf004.emit('shrink');
@@ -264,6 +270,33 @@ function fadeall() {
     zcf010.emit('shrink');
     zcf011.emit('shrink');
     zcf012.emit('shrink');
-    zcf013.emit('shrink');
+    zcf013.emit('shrink');*/
+
+    switch(parseInt(opn)) {
+        case 1:
+            zcf001.emit('shrink');
+        case 2:
+            zcf002.emit('shrink');
+        case 3:
+            zcf003.emit('shrink');
+        case 4:
+            zcf004.emit('shrink');
+        case 5:
+            zcf005.emit('shrink');
+        case 6:
+            zcf006.emit('shrink');
+        case 7:
+            zcf007.emit('shrink');
+        case 8:
+            zcf008.emit('shrink');
+        case 9:
+            zcf009.emit('shrink');
+        case 10:
+            zcf010.emit('shrink');
+        case 11:
+            zcf011.emit('shrink');
+        case 12:
+            zcf012.emit('shrink');
+    }    
 }
 
