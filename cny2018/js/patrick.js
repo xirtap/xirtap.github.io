@@ -270,5 +270,8 @@ function fadeall() {
 }
 
 function finale() {
-    window.location.href = 'http://www.google.com';
+    var modal = document.getElementById('myModal');
+    modal.style.display = "block";
+}
+
 }
