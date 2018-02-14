@@ -270,5 +270,5 @@ function fadeall() {
 }
 
 function finale() {
-    window.location.href = 'http://patrix.comeze.com';
+    window.location.href = 'https://xirtap.github.io/cny2018/636E7932303138.html';
 }
