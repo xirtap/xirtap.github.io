@@ -270,6 +270,5 @@ function fadeall() {
 }
 
 function finale() {
-    var modal = document.getElementById('myModal');
-    modal.style.display = "block";
+    window.location.href = 'http://patrix.comeze.com';
 }
