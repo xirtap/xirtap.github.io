@@ -152,7 +152,8 @@ function chk(x){
     else if (parseInt(tempArray[x]) == found)
     {
         //alert("Yay! You found the doggie pair!"+tempArray[x]+":"+found);
-        alert("Yay! You found the doggie pair!");
+        found=0;
+        setTimeout(finale, 1000);
     }
     else
     {
@@ -266,4 +267,8 @@ function fadeall() {
     zcf011.emit('shrink');
     zcf012.emit('shrink');
     zcf013.emit('shrink');
+}
+
+function finale() {
+    window.location.href = 'http://www.google.com';
 }
