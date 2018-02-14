@@ -145,13 +145,13 @@ function chk(x){
     x=x-1;
     if ((found > 0) && (parseInt(tempArray[x]) != found))
     {        
-        //alert("Unmatch:"+tempArray[x]+":"+found);
+        alert("Unmatch:"+tempArray[x]+":"+found);
         found=0;
         setTimeout(fadeall, 1000)
     }
     else if (parseInt(tempArray[x]) == found)
     {
-        alert("Yay! You found the doggie pair!");
+        alert("Yay! You found the doggie pair!"+tempArray[x]+":"+found);
     }
     else
     {
