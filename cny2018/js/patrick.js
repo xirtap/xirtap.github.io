@@ -58,6 +58,18 @@ var bkgnd='panorama.png';
 document.write('<a-assets><img id="coin" src="assets/' + image + '"></a-assets>');
 document.write('<a-assets><img id="pano" src="assets/' + bkgnd + '"></a-assets>');
 
+//Dummies
+document.write('<a-assets><img id="z888"></a-assets>');
+
+document.write('<a-image id="zc888" src="#z888" position="0 3 -3" scale="0 0 0">');
+document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" ></a-animation>');
+document.write('</a-image>');
+
+document.write('<a-image id="zc999" src="#z888" position="0 3 -3" scale="0 0 0">');
+document.write('<a-animation attribute="scale" begin="shrink" to="0 0 0" ></a-animation>');
+document.write('</a-image>');
+
+
 //Top 4
 document.write('<a-image id="cf1" src="#coin" width="5" height="5" position="0 2 -1.5" rotation="60 0 0" scale="0.2 0.2 0.2"></a-image>');
 document.write('<a-image id="zc01" src="#z1" width="2" height="2" position="0 1.5 -1" rotation="60 0 0" scale="0 0 0">');
@@ -253,7 +265,17 @@ cf013.addEventListener('click', function () {
     chk(13);
 }); 
 
+var zcf888 = document.querySelector('#zc888');
+cf001.addEventListener('click', function () {
+});
+
+var zcf999 = document.querySelector('#zc999');
+cf001.addEventListener('click', function () {
+});
+
 function fadeall() {
+    zcf888.emit('shrink');
+    zcf999.emit('shrink');
     zcf001.emit('shrink');
     zcf002.emit('shrink');
     zcf003.emit('shrink');
