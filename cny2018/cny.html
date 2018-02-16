@@ -1,31 +1,25 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <meta charset="utf-8">
-    <title>CNY WebVR from Patrick</title>
-    <meta name="description" content="CNY WebVR from Patrick">
-    <script src="js/aframe.min.js"></script>
-    
-    <link rel="stylesheet" href="css/animate.css" />
-    <link rel="stylesheet" href="css/style.css" />
+        <title>CNY2018 WebVR from Patrick Lim</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="CNY2018 WebVR">
+        <style>
+            body {
+                margin: 0;            /* Reset default margin */
+            }
+            iframe {
+                display: block;       /* iframes are inline by default */
+                background: #000;
+                border: none;         /* Reset default border */
+                height: 100vh;        /* Viewport-relative units */
+                width: 100vw;
+            }
+        </style>
 </head>
 
-<body>   
-    <a-scene>
-        <!-- preload assets -->
-
-        <!--<a-scene vr-mode-ui="enabled: false">-->
-        <script src="js/patrick.js"></script>
-
-        <a-light type="point" color="#fd1" position="0 5 0"></a-light>
-        <a-light type="point" color="#fd1" position="0.1 1.4 1"></a-light>
-
-        <a-sky src="#pano"></a-sky>
-        <a-camera position="0 0 0">
-            <a-cursor color="#fff"></a-cursor>
-        </a-camera>
-    </a-scene>
+<body>
+    <iframe height="100%" width="100%" src="https://xirtap.github.io/cny2018/636E79323031382E68746D6C.html" style="border:none;" frameborder="0" allowfullscreen></iframe>
 </body>
 
 </html>
