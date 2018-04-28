@@ -1,17 +1,21 @@
 {
     "dir": "ltr",
     "lang": "en",
-    "name": "WhereTheHeckAmINow?",
-    "scope": "/Map/a.html",
+    "name": "WhereTheHeckAmINow",
+    "scope": "/",
     "display": "standalone",
     "start_url": "/",
     "short_name": "FindMe",
     "background_color": "#3498DB",
     "theme_color": "#34495E",
-    "description": "Demonstrate web capability of using device sensors",
+    "description": "Where the heck am I now",
     "orientation": "landscape-primary",
     "related_applications": [],
     "prefer_related_applications": false,
+    "serviceworker":{
+        "src":"/ServiceWorker1/pwabuilder-sw.js",
+        "scope":"/"
+    }
     "icons": [
         {
             "src": "/images/1daaad6c-bcd3-d386-2464-09088eaf6427.webPlatform.png",
