@@ -3,7 +3,7 @@
     "short_name": "FindMe",
     "description": "Demo on PWA",
     "lang": "en-US",
-    "start_url": "/",
+    "start_url": "/PWADemo/",
     "display": "standalone",
     "theme_color": "#E6E6FA",
     "background_color": "#E6E6FA",    
