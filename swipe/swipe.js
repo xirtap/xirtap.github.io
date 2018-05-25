@@ -1,36 +1,39 @@
-var touchstartX = 0;
-var touchstartY = 0;
-var touchendX = 0;
-var touchendY = 0;
+let touchstartX = 0;
+let touchstartY = 0;
+let touchendX = 0;
+let touchendY = 0;
 
-var gesuredZone = document.getElementById('gesuredZone');
+const gestureZone = document.getElementById('gestureZone');
 
-gesuredZone.addEventListener('touchstart', function(event) {
-    touchstartX = event.screenX;
-    touchstartY = event.screenY;
+gestureZone.addEventListener('touchstart', function(event) {
+    touchstartX = event.changedTouches[0].screenX;
+    touchstartY = event.changedTouches[0].screenY;
 }, false);
 
-gesuredZone.addEventListener('touchend', function(event) {
-    touchendX = event.screenX;
-    touchendY = event.screenY;
-    handleGesure();
+gestureZone.addEventListener('touchend', function(event) {
+    touchendX = event.changedTouches[0].screenX;
+    touchendY = event.changedTouches[0].screenY;
+    handleGesture();
 }, false); 
 
-function handleGesure() {
-    var swiped = 'swiped: ';
-    if (touchendX < touchstartX) {
-        alert(swiped + 'left!');
+function handleGesture() {
+    if (touchendX <= touchstartX) {
+        console.log('Swiped left');
     }
-    if (touchendX > touchstartX) {
-        alert(swiped + 'right!');
+    
+    if (touchendX >= touchstartX) {
+        console.log('Swiped right');
     }
-    if (touchendY < touchstartY) {
-        alert(swiped + 'down!');
+    
+    if (touchendY <= touchstartY) {
+        console.log('Swiped up');
     }
-    if (touchendY > touchstartY) {
-        alert(swiped + 'left!');
+    
+    if (touchendY >= touchstartY) {
+        console.log('Swiped down');
     }
-    if (touchendY == touchstartY) {
-        alert('tap!');
+    
+    if (touchendY === touchstartY) {
+        console.log('Tap');
     }
 }
