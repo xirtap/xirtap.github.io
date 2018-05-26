@@ -1,13 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="swipe.js"></script>  
+  <script src="hammer.min.js" type="text/javascript" ></script>  
 </head>
 <body>
 
-<canvas id="gesturedZone" width="1000" height="1000" style="border:1px solid #d3d3d3;">
-Your browser does not support the HTML5 canvas tag.</canvas>
+<div>
+<canvas id="swipe" width="800" height="500" style="border:1px solid #d3d3d3;" ></canvas>
+
+<div id="inst">Tap Me!</div>
+
+<!-- img id="swipe" src="01.jpg" -->
+</div>
+
+<script type="text/javascript">
+  var element=document.getElementById('swipe');
+  Hammer(element).on("swipeleft",function(event){alert("Swiped left!");});
+  Hammer(element).on("swiperight",function(event){alert("Swiped right!");});
+
+  var element=document.getElementById('inst');
+  Hammer(element).on("tap",function(event){alert("Tapped!");});
+</script>
 
 </body>
 </html>
-
