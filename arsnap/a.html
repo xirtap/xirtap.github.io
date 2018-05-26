@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Face Tracking Photo Booth</title>
+    <script src="libraries/p5.min.js" type="text/javascript"></script>
+    <script src="libraries/p5.dom.min.js" type="text/javascript"></script>
+    <script src="libraries/clmtrackr.js" type="text/javascript"></script>
+    <script src="libraries/model_pca_20_svm.js" type="text/javascript"></script>
+    <script src="sketch.js" type="text/javascript"></script>
+    <script src="hammer.min.js" type="text/javascript" ></script> 
+
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+            font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+            font-weight: 300;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        video {
+            display: block;
+            width: 100% !important;
+            height: auto !important;
+            vertical-align: top;
+        }
+        
+        canvas {
+            display: block;
+            width: 100% !important;
+            height: auto !important;
+            vertical-align: top;
+        }
+        
+        #logo {
+            position: absolute;
+            z-index: 1000;
+        }
+        
+        #logo img {
+            width: 310px;
+        }
+        
+        #inst {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+        }
+
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body id="swipe">
+    <div id="logo"><img src="img/xirtapX.jpg" alt="xirtap xperiment"></div>
+    <!-- div id="inst">Use left and right arrow key to change prop
+        <br> Press S to save the screen</div -->
+    <div id="inst">
+        <i class="fa fa-camera-retro" style="font-size:48px;color:red"></i>
+    </div>
+</body>
+
+<script type="text/javascript">
+    var element=document.getElementById('swipe');
+    Hammer(element).on("swipeleft",function(event){nextpic();});
+    Hammer(element).on("swiperight",function(event){prevpic();});
+
+    var element=document.getElementById('inst');
+    Hammer(element).on("tap",function(event){snappic();});
+</script>
+
+</html>
