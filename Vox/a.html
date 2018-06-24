@@ -1,10 +1,32 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>     
-    </head>
-    <body>
-        <script src="patrick.js"></script>
+  <head>
+    <script src="speakClient.js"></script>
+    <script src="annyang.min.js"></script>
+  </head>
+  <body>
+    <div id="audio"></div>
+  </body>
+  <script type="text/javascript">
+    if (annyang) {
 
-    </body>
+      var sayThis = function(repeat) {
+        speak(repeat);
+      }
+
+      // Let's define a command.
+      var commands = {
+        '*repeat': sayThis
+      };
+
+      // Turn on debugging for the console
+      annyang.debug();
+
+      // Initialize annyang with our commands
+      annyang.init(commands);
+
+      // Start listening.
+      annyang.start();
+    }
+  </script>
 </html>
