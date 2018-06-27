@@ -5,13 +5,14 @@
     <script src="annyang.min.js"></script>
   </head>
   <body>
-    <div id="audio"></div>
+    <div id="audio">I am listening... please speak...</div>
   </body>
   <script type="text/javascript">
     if (annyang) {
 
       var sayThis = function(repeat) {
         speak(repeat);
+        alert(repeat);
       }
 
       // Let's define a command.
@@ -27,6 +28,7 @@
 
       // Start listening.
       annyang.start();
+
     }
   </script>
 </html>
