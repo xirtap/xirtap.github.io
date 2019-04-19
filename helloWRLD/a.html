@@ -31,36 +31,11 @@
     <p id="demo"></p>
     <div class="container" id="map"></div>
     
-    <script>
-        var x = document.getElementById("demo");
+    <script src="https://xirtap.github.io/helloWRLD/patrick.js"></script>
 
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition);
-            } else {
-                x.innerHTML = "Geolocation is not supported by this browser.";
-            }
-        }
-
-        function showPosition(position) {
-            var map = L.Wrld.map("map", "da70b0d2173a3f3f5299df3692507b57", {
-            center: [position.coords.latitude,position.coords.longitude],
-            zoom: 16
-            });
-        }
-    </script>
-
-    <img src="b.jpg" class="over-img" onclick="balikkampung()"/>
-
-    <script>
-        function balikkampung() {
-            var map = L.Wrld.map("map", "da70b0d2173a3f3f5299df3692507b57", {
-            center: [1.3490, 103.8391],
-            zoom: 16
-            });
-            location.reload();
-        }
-    </script>
+    <a href="https://xirtap.github.io/helloWRLD/aGVsbG9IT01F.html">
+        <img src="b.jpg" class="over-img"/>
+    </a>
 </body>
 
 </html>
