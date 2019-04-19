@@ -18,13 +18,23 @@
 </style>
 </head>
 
-<body>
+<body onload="getLocation()">
     <div class="container" id="map"></div>
     <script>
-        var map = L.Wrld.map("map", "da70b0d2173a3f3f5299df3692507b57", {
-          center: [1.3490, 103.8391],
-          zoom: 16
-        });
+        function getLocation() {
+                if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+            x.innerHTML = "Geolocation is not supported by this browser.";
+            }
+        }
+
+        function showPosition(position) {
+            var map = L.Wrld.map("map", "da70b0d2173a3f3f5299df3692507b57", {
+            center: [position.coords.latitude,position.coords.longitude],
+            zoom: 18
+            });
+        }
       </script>
 
 </body>
