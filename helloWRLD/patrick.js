@@ -14,4 +14,18 @@ function showPosition(position) {
         zoom: 16
         });
     var marker = L.marker([position.coords.latitude,position.coords.longitude]).addTo(map);
+
+    var today = new Date();
+    var hours = today.getHours();
+    if (hours > 20) {
+        map.themes.setTime([L.Wrld.themes.time.Night]);
+    } else if (hours > 17) {
+        map.themes.setTime([L.Wrld.themes.time.Dusk]);
+    } else if (hours > 10) {
+        map.themes.setTime([L.Wrld.themes.time.Day]);
+    } else if (hours > 7) {
+        map.themes.setTime([L.Wrld.themes.time.Dawn]);
+    } else {
+        map.themes.setTime([L.Wrld.themes.time.Night]);
+    }
 }
