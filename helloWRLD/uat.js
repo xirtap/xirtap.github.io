@@ -14,7 +14,11 @@ function showPosition(position) {
         zoom: 16
         });
     var marker = L.marker([position.coords.latitude,position.coords.longitude]).addTo(map);
-    map.themes.setTime([L.Wrld.themes.time.Night]);
+map.themes.setTheme(
+    L.Wrld.themes.season.Summer,
+    L.Wrld.themes.time.Night,
+    L.Wrld.themes.weather.Clear
+);
     /*
     var today = new Date();
     var hours = today.getHours();
