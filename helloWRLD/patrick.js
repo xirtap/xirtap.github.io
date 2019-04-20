@@ -13,6 +13,5 @@ function showPosition(position) {
         center: [position.coords.latitude,position.coords.longitude],
         zoom: 16
         });
-    var latlng = event.latlng;
-    var marker = L.marker(latlng).addTo(map);
+    var marker = L.marker([position.coords.latitude,position.coords.longitude]).addTo(map);
 }
