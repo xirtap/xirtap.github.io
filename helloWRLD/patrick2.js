@@ -12,7 +12,7 @@ var map = L.Wrld.map("map", "da70b0d2173a3f3f5299df3692507b57", {
             L.Wrld.themes.time.Night,
             L.Wrld.themes.weather.Clear
         );
-    } else if (hours > 16) {
+    } else if (hours > 18) {
         map.themes.setTheme(
             L.Wrld.themes.season.Summer,
             L.Wrld.themes.time.Dusk,
