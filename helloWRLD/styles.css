@@ -1,0 +1,15 @@
+html, body {
+    height: 100%;
+    margin: 0px;
+}
+
+.container {
+    height: 100%;
+    background: #f0e68c;
+}
+
+.over-img{
+    position: absolute;
+    top: 70%;
+    left: 0%;
+}
