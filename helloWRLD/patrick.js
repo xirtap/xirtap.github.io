@@ -23,7 +23,7 @@ function showPosition(position) {
             L.Wrld.themes.time.Night,
             L.Wrld.themes.weather.Clear
         );
-    } else if (hours > 16) {
+    } else if (hours > 18) {
         map.themes.setTheme(
             L.Wrld.themes.season.Summer,
             L.Wrld.themes.time.Dusk,
