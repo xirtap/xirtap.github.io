@@ -14,6 +14,8 @@ function showPosition(position) {
         zoom: 16
         });
     var marker = L.marker([position.coords.latitude,position.coords.longitude]).addTo(map);
+    map.themes.setTime([L.Wrld.themes.time.Night]);
+    /*
     var today = new Date();
     var hours = today.getHours();
     if (hours > 20) {
@@ -28,5 +30,5 @@ function showPosition(position) {
         map.themes.setTime([L.Wrld.themes.time.Night]);
     }
     
-    x.innerHTML = "Time is " + hours;
+    x.innerHTML = "Time is "+hours;*/
 }
