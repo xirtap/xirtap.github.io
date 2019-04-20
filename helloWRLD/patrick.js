@@ -17,13 +17,13 @@ function showPosition(position) {
 
     var today = new Date();
     var hours = today.getHours();
-    if (hours > 20) {
+    if (hours > 19) {
         map.themes.setTime([L.Wrld.themes.time.Night]);
-    } else if (hours > 17) {
+    } else if (hours > 16) {
         map.themes.setTime([L.Wrld.themes.time.Dusk]);
-    } else if (hours > 10) {
+    } else if (hours > 9) {
         map.themes.setTime([L.Wrld.themes.time.Day]);
-    } else if (hours > 7) {
+    } else if (hours > 6) {
         map.themes.setTime([L.Wrld.themes.time.Dawn]);
     } else {
         map.themes.setTime([L.Wrld.themes.time.Night]);
