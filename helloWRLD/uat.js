@@ -27,4 +27,6 @@ function showPosition(position) {
     } else {
         map.themes.setTime([L.Wrld.themes.time.Night]);
     }
+    
+    x.innerHTML = "Time is " + hours;
 }
