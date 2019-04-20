@@ -14,25 +14,39 @@ function showPosition(position) {
         zoom: 16
         });
     var marker = L.marker([position.coords.latitude,position.coords.longitude]).addTo(map);
-map.themes.setTheme(
-    L.Wrld.themes.season.Summer,
-    L.Wrld.themes.time.Night,
-    L.Wrld.themes.weather.Clear
-);
-    /*
+
     var today = new Date();
     var hours = today.getHours();
     if (hours > 20) {
-        map.themes.setTime([L.Wrld.themes.time.Night]);
+        map.themes.setTheme(
+            L.Wrld.themes.season.Summer,
+            L.Wrld.themes.time.Night,
+            L.Wrld.themes.weather.Clear
+        );
     } else if (hours > 17) {
-        map.themes.setTime([L.Wrld.themes.time.Dusk]);
+        map.themes.setTheme(
+            L.Wrld.themes.season.Summer,
+            L.Wrld.themes.time.Dusk,
+            L.Wrld.themes.weather.Clear
+        );
     } else if (hours > 10) {
-        map.themes.setTime([L.Wrld.themes.time.Day]);
+        map.themes.setTheme(
+            L.Wrld.themes.season.Summer,
+            L.Wrld.themes.time.Day,
+            L.Wrld.themes.weather.Clear
+        );
     } else if (hours > 7) {
-        map.themes.setTime([L.Wrld.themes.time.Dawn]);
+        map.themes.setTheme(
+            L.Wrld.themes.season.Summer,
+            L.Wrld.themes.time.Dawn,
+            L.Wrld.themes.weather.Clear
+        );
     } else {
-        map.themes.setTime([L.Wrld.themes.time.Night]);
+        map.themes.setTheme(
+            L.Wrld.themes.season.Summer,
+            L.Wrld.themes.time.Night,
+            L.Wrld.themes.weather.Clear
+        );
     }
-    
-    x.innerHTML = "Time is "+hours;*/
+
 }
