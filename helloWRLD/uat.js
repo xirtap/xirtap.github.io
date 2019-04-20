@@ -17,25 +17,25 @@ function showPosition(position) {
 
     var today = new Date();
     var hours = today.getHours();
-    if (hours > 20) {
+    if (hours > 19) {
         map.themes.setTheme(
             L.Wrld.themes.season.Summer,
             L.Wrld.themes.time.Night,
             L.Wrld.themes.weather.Clear
         );
-    } else if (hours > 17) {
+    } else if (hours > 16) {
         map.themes.setTheme(
             L.Wrld.themes.season.Summer,
             L.Wrld.themes.time.Dusk,
             L.Wrld.themes.weather.Clear
         );
-    } else if (hours > 10) {
+    } else if (hours > 9) {
         map.themes.setTheme(
             L.Wrld.themes.season.Summer,
             L.Wrld.themes.time.Day,
             L.Wrld.themes.weather.Clear
         );
-    } else if (hours > 7) {
+    } else if (hours > 6) {
         map.themes.setTheme(
             L.Wrld.themes.season.Summer,
             L.Wrld.themes.time.Dawn,
