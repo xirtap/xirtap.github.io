@@ -29,7 +29,7 @@ function showPosition(position) {
             L.Wrld.themes.time.Dusk,
             L.Wrld.themes.weather.Clear
         );
-    } else if (hours > 9) {
+    } else if (hours > 8) {
         map.themes.setTheme(
             L.Wrld.themes.season.Summer,
             L.Wrld.themes.time.Day,
