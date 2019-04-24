@@ -1,0 +1,22 @@
+<html>
+    <head>
+      <script type="text/javascript" src="https://code.jquery.com/jquery-1.7.2.min.js"></script>
+        <script>
+        function Cloud(){
+        $.ajax({
+        url: 'https://developers.onemap.sg/commonapi/search?searchVal=Shunfu&nbsproad&returnGeom=Y&getAddrDetails=Y&pageNum=1',
+        success: function(result){
+            //Set result to a variable for writing
+            //var TrueResult = JSON.stringify(result);
+                //var Lat = result.results[0].LONGITUDE);
+                //var Lng = result.results[0].LONGITUDE);
+                var Lat = result.results[0].LATITUDE;
+                var Lng = result.results[0].LONGITUDE;
+                document.write(Lng + "," + Lat);
+            }});
+        }
+
+        Cloud();
+      </script>
+    </head>
+</html>

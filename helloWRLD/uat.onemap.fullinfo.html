@@ -1,0 +1,19 @@
+<html>
+    <head>
+      <script type="text/javascript" src="https://code.jquery.com/jquery-1.7.2.min.js"></script>
+        <script>
+        function Cloud(){
+        $.ajax({
+        //url: 'https://developers.onemap.sg/commonapi/search?searchVal=revenue&returnGeom=Y&getAddrDetails=Y&pageNum=1',
+        url: 'https://developers.onemap.sg/commonapi/search?searchVal=Shunfu&nbsproad&returnGeom=Y&getAddrDetails=Y&pageNum=1',
+        success: function(result){
+            //Set result to a variable for writing
+            var TrueResult = JSON.stringify(result);
+            document.write(TrueResult);
+            }});
+        }
+
+        Cloud();
+      </script>
+    </head>
+</html>
