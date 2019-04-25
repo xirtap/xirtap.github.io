@@ -43,7 +43,7 @@ function Cloud(searchEncoded){
         var Lng = result.results[0].LONGITUDE;
         //document.getElementById("results").innerHTML = "Long & Lat: " + Lng + "," + Lat;
         moveToLoc(Lat,Lng);
-        //alert(Lat+","+Lng);
+        alert(Lat+","+Lng);
     }});
 }
 
