@@ -1,10 +1,8 @@
-var x = document.getElementById("demo");
-
 function getLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition);
     } else {
-        x.innerHTML = "Geolocation is not supported by this browser.";
+        alert("Geolocation is not supported by this browser.");
     }
 }
 
@@ -27,29 +25,30 @@ function showPosition(position) {
     } else {
         map.themes.setTime([L.Wrld.themes.time.Night]);
     }
+}
 
-    function moveToLoc(Lat,Long) {
-        map.setView([Lat, Long], 18, {
-        headingDegrees: 30,
-        animate: true,
-        durationSeconds:5
-      });
-    }
+function moveToLoc(Lat,Long) {
+    map.setView([Lat, Long], 18, {
+    headingDegrees: 30,
+    animate: true,
+    durationSeconds:5
+    });
+}
 
-    function Cloud(searchEncoded){
+function Cloud(searchEncoded){
     $.ajax({
     url: 'https://developers.onemap.sg/commonapi/search?searchVal='+searchEncoded+'&returnGeom=Y&getAddrDetails=Y&pageNum=1',
     success: function(result){
-            var Lat = result.results[0].LATITUDE;
-            var Lng = result.results[0].LONGITUDE;
-            //document.getElementById("results").innerHTML = "Long & Lat: " + Lng + "," + Lat;
-            moveToLoc(Lat,Lng);
-        }});
-    }
-
-    function getsearchval(){
-        var search = document.getElementById('searchval').value;
-        var searchEncoded = encodeURIComponent(search);
-        Cloud(searchEncoded);
-    }    
+        var Lat = result.results[0].LATITUDE;
+        var Lng = result.results[0].LONGITUDE;
+        //document.getElementById("results").innerHTML = "Long & Lat: " + Lng + "," + Lat;
+        moveToLoc(Lat,Lng);
+        alert(Lat+","+Lng);
+    }});
 }
+
+function getsearchval(){
+    var search = document.getElementById('searchval').value;
+    var searchEncoded = encodeURIComponent(search);
+    Cloud(searchEncoded);
+}    
