@@ -36,8 +36,12 @@ function moveToLoc(Lat,Lng) {
 }
 
 function Cloud(searchEncoded){
+    var str1="'https://developers.onemap.sg/commonapi/search?searchVal=";
+    var str2="&returnGeom=Y&getAddrDetails=Y&pageNum=1'";
+    var apiurl=str1.concat(searchEncoded, str2);
+    
     $.ajax({
-    url: 'https://developers.onemap.sg/commonapi/search?searchVal='+searchEncoded+'&returnGeom=Y&getAddrDetails=Y&pageNum=1',
+    url: apiurl,
     success: function(result){
         var Lat = result.results[0].LATITUDE;
         var Lng = result.results[0].LONGITUDE;
