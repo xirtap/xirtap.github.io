@@ -43,12 +43,13 @@ function Cloud(searchEncoded){
         var Lng = result.results[0].LONGITUDE;
         //document.getElementById("results").innerHTML = "Long & Lat: " + Lng + "," + Lat;
         moveToLoc(Lat,Lng);
-        alert(Lat+","+Lng);
+        //alert(Lat+","+Lng);
     }});
 }
 
 function getsearchval(){
     var search = document.getElementById('searchval').value;
     var searchEncoded = encodeURIComponent(search);
+    //alert(searchEncoded);
     Cloud(searchEncoded);
 }    
