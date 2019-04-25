@@ -27,8 +27,8 @@ function showPosition(position) {
     }
 }
 
-function moveToLoc(Lat,Lng) {
-    map.setView([1.2494, 103.8303], 18, {
+function moveToLoc(Lat,Long) {
+    map.setView([Lat, Long], 18, {
     headingDegrees: 30,
     animate: true,
     durationSeconds:5
@@ -36,24 +36,24 @@ function moveToLoc(Lat,Lng) {
 }
 
 function Cloud(searchEncoded){
-    var str1="'https://developers.onemap.sg/commonapi/search?searchVal=";
-    var str2="&returnGeom=Y&getAddrDetails=Y&pageNum=1'";
-    var apiurl=str1.concat(searchEncoded, str2);
-    
+    var str1="https://developers.onemap.sg/commonapi/search?searchVal=";
+    var str2="&returnGeom=Y&getAddrDetails=Y&pageNum=1";
+    var apiurl=str1.concat(searchEncoded, str2);  
+
     $.ajax({
     url: apiurl,
     success: function(result){
         var Lat = result.results[0].LATITUDE;
         var Lng = result.results[0].LONGITUDE;
         //document.getElementById("results").innerHTML = "Long & Lat: " + Lng + "," + Lat;
-        alert(Lat+","+Lng);
-        //moveToLoc(Lat,Lng);
+        moveToLoc(Lat,Lng);
+        //alert(Lat+","+Lng);
     }});
 }
 
 function getsearchval(){
     var search = document.getElementById('searchval').value;
     var searchEncoded = encodeURIComponent(search);
-    alert(searchEncoded);
+    //alert(searchEncoded);
     Cloud(searchEncoded);
 }    
