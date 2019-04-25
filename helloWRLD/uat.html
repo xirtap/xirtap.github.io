@@ -6,11 +6,22 @@
 <title>helloWRLD</title>
 <script src="https://cdn-webgl.wrld3d.com/wrldjs/dist/latest/wrld.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.1/leaflet.css" rel="stylesheet" />
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="uat.css">
 </head>
 
 <body onload="getLocation()">
-    <p id="demo"></p>
+
+    <div class="topnav">
+            <a class="active" href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+            <div class="search-container">
+                <input type="text" placeholder="Search.." name="searchval" id="searchval">
+                <button type="button" onclick="getsearchval()"><i class="fa fa-search"></i></button>
+            </div>
+    </div>
+    
     <div class="container" id="map"></div>
     
     <script src="https://xirtap.github.io/helloWRLD/uat.js"></script>
