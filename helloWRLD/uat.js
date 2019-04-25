@@ -28,7 +28,7 @@ function showPosition(position) {
 }
 
 function moveToLoc(Lat,Lng) {
-    map.setView([Lat, Lng], 18, {
+    map.setView([1.2494, 103.8303], 18, {
     headingDegrees: 30,
     animate: true,
     durationSeconds:5
@@ -50,6 +50,6 @@ function Cloud(searchEncoded){
 function getsearchval(){
     var search = document.getElementById('searchval').value;
     var searchEncoded = encodeURIComponent(search);
-    //alert(searchEncoded);
+    alert(searchEncoded);
     Cloud(searchEncoded);
 }    
