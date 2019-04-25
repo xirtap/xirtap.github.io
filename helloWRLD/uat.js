@@ -27,8 +27,8 @@ function showPosition(position) {
     }
 }
 
-function moveToLoc(Lat,Long) {
-    map.setView([Lat, Long], 18, {
+function moveToLoc(Lat,Lng) {
+    map.setView([Lat, Lng], 18, {
     headingDegrees: 30,
     animate: true,
     durationSeconds:5
@@ -42,8 +42,8 @@ function Cloud(searchEncoded){
         var Lat = result.results[0].LATITUDE;
         var Lng = result.results[0].LONGITUDE;
         //document.getElementById("results").innerHTML = "Long & Lat: " + Lng + "," + Lat;
-        moveToLoc(Lat,Lng);
         alert(Lat+","+Lng);
+        moveToLoc(Lat,Lng);
     }});
 }
 
