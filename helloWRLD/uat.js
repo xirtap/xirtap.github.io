@@ -55,8 +55,8 @@ function Cloud(searchEncoded){
         var Lat = result.results[0].LATITUDE;
         var Lng = result.results[0].LONGITUDE;
         //document.getElementById("results").innerHTML = "Long & Lat: " + Lng + "," + Lat;
+        alert(Lat+","+Lng);
         moveToLoc(Lat,Lng);
-        //alert(Lat+","+Lng);
     }});
 }
 
