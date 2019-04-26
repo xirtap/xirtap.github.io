@@ -13,12 +13,16 @@ function getLocation() {
     }
 }
 
-function showPosition(position) {
-    map.setView([position.coords.latitude,position.coords.longitude], 18, {
+function moveToLoc(Lat,Long) {
+    map.setView([Lat, Long], 18, {
         headingDegrees: 30,
         animate: true,
         durationSeconds:5
     });
+}
+
+function showPosition(position) {
+    moveToLoc(position.coords.latitude,position.coords.longitude);
     marker = L.marker([position.coords.latitude,position.coords.longitude]).addTo(map);
     
     var today = new Date();
@@ -36,13 +40,6 @@ function showPosition(position) {
     }
 }
 
-function moveToLoc(Lat,Long) {
-    map.setView([Lat, Long], 18, {
-        headingDegrees: 30,
-        animate: true,
-        durationSeconds:5
-    });
-}
 
 function Cloud(searchEncoded){
     var str1="https://developers.onemap.sg/commonapi/search?searchVal=";
