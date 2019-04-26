@@ -51,7 +51,7 @@ function Cloud(searchEncoded){
     success: function(result){
         var Lat = result.results[0].LATITUDE;
         var Lng = result.results[0].LONGITUDE;
-        //document.getElementById("results").innerHTML = "Long & Lat: " + Lng + "," + Lat;
+
         alert(Lat+","+Lng);
         moveToLoc(Lat,Lng);
     }});
@@ -60,6 +60,6 @@ function Cloud(searchEncoded){
 function getsearchval(){
     var search = document.getElementById('searchval').value;
     var searchEncoded = encodeURIComponent(search);
-    //alert(searchEncoded);
+    alert(searchEncoded);
     Cloud(searchEncoded);
 }    
