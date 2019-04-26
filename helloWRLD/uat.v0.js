@@ -1,10 +1,3 @@
-var map = L.Wrld.map("map", "da70b0d2173a3f3f5299df3692507b57", {
-    center: [1.3490,103.8391],
-    zoom: 16
-    });
-var marker = L.marker([1.3490,103.8391]).addTo(map);
-
-
 function getLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition);
@@ -14,13 +7,11 @@ function getLocation() {
 }
 
 function showPosition(position) {
-    map.setView([position.coords.latitude,position.coords.longitude], 18, {
-        headingDegrees: 30,
-        animate: true,
-        durationSeconds:5
-    });
-    marker = L.marker([position.coords.latitude,position.coords.longitude]).addTo(map);
-    
+    var map = L.Wrld.map("map", "da70b0d2173a3f3f5299df3692507b57", {
+        center: [position.coords.latitude,position.coords.longitude],
+        zoom: 16
+        });
+    var marker = L.marker([position.coords.latitude,position.coords.longitude]).addTo(map);
     var today = new Date();
     var hours = today.getHours();
     if (hours > 20) {
@@ -38,9 +29,9 @@ function showPosition(position) {
 
 function moveToLoc(Lat,Long) {
     map.setView([Lat, Long], 18, {
-        headingDegrees: 30,
-        animate: true,
-        durationSeconds:5
+    headingDegrees: 30,
+    animate: true,
+    durationSeconds:5
     });
 }
 
@@ -65,4 +56,4 @@ function getsearchval(){
     var searchEncoded = encodeURIComponent(search);
     //alert(searchEncoded);
     Cloud(searchEncoded);
-}    
+} 
