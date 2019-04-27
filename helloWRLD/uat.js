@@ -45,14 +45,14 @@ function Cloud(searchEncoded){
     var str1="https://developers.onemap.sg/commonapi/search?searchVal=";
     var str2="&returnGeom=Y&getAddrDetails=Y&pageNum=1";
     var apiurl=str1.concat(searchEncoded, str2);  
-
+alert(apiurl);
     $.ajax({
     url: apiurl,
     success: function(result){
         var Lat = result.results[0].LATITUDE;
         var Lng = result.results[0].LONGITUDE;
 
-        alert(Lat+","+Lng);
+alert(Lat+","+Lng);
         moveToLoc(Lat,Lng);
     }});
 }
@@ -60,6 +60,6 @@ function Cloud(searchEncoded){
 function getsearchval(){
     var search = document.getElementById('searchval').value;
     var searchEncoded = encodeURIComponent(search);
-    alert(searchEncoded);
+alert(searchEncoded);
     Cloud(searchEncoded);
 }    
