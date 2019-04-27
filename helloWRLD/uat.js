@@ -46,8 +46,10 @@ function Cloud(searchEncoded){
     var str2="&returnGeom=Y&getAddrDetails=Y&pageNum=1";
     var apiurl=str1.concat(searchEncoded, str2);  
 alert(apiurl);
+    
     $.ajax({
-    url: apiurl,
+    //url: apiurl,
+        url: 'https://developers.onemap.sg/commonapi/search?searchVal=lido&returnGeom=Y&getAddrDetails=Y&pageNum=1',
     success: function(result){
         var Lat = result.results[0].LATITUDE;
         var Lng = result.results[0].LONGITUDE;
