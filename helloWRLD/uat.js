@@ -20,7 +20,7 @@ function moveToLoc(Lat,Long) {
         animate: true,
         durationSeconds:5
     });
-    var mker = L.marker(Lat,Long).addTo(map);
+    var mker = L.marker([Lat,Long]).addTo(map);
 }
 
 function showPosition(position) {
@@ -41,7 +41,6 @@ function showPosition(position) {
         map.themes.setTime([L.Wrld.themes.time.Night]);
     }
 }
-
 
 function Cloud(searchEncoded){
     var Lat=0;
