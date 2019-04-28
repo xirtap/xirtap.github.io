@@ -55,7 +55,7 @@ alert(apiurl);
         var Lng = result.results[0].LONGITUDE;
 
 alert(Lat+","+Lng);
-        moveToLoc(Lat,Lng);
+        //moveToLoc(Lat,Lng);
     }});
 }
 
