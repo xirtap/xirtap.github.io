@@ -42,27 +42,24 @@ function showPosition(position) {
 
 
 function Cloud(searchEncoded){
-    var Lat = 1.01;
-    var Lng = 1.01;
     var str1="https://developers.onemap.sg/commonapi/search?searchVal=";
     var str2="&returnGeom=Y&getAddrDetails=Y&pageNum=1";
     var apiurl=str1.concat(searchEncoded, str2);  
-alert(apiurl);
-    
+//alert(apiurl);
+
     $.ajax({
-    url: 'https://developers.onemap.sg/commonapi/search?searchVal=lido&returnGeom=Y&getAddrDetails=Y&pageNum=1',
+    url: apiurl,
     success: function(result){
-        Lat = result.results[0].LATITUDE;
-        Lng = result.results[0].LONGITUDE;
+        var Lat = result.results[0].LATITUDE;
+        var Lng = result.results[0].LONGITUDE;
+
+alert(Lat+','+Lng);
         //moveToLoc(Lat,Lng);
     }});
-    
-    alert(Lat+","+Lng);
 }
 
 function getsearchval(){
     var search = document.getElementById('searchval').value;
     var searchEncoded = encodeURIComponent(search);
-alert(searchEncoded);
     Cloud(searchEncoded);
 }    
