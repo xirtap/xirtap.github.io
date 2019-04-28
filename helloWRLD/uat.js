@@ -42,22 +42,20 @@ function showPosition(position) {
 
 
 function Cloud(searchEncoded){
-    var Lat=1.01;
-    var Lng=1.01;
+    var Lat=0;
+    var Lng=0;
     var str1="https://developers.onemap.sg/commonapi/search?searchVal=";
     var str2="&returnGeom=Y&getAddrDetails=Y&pageNum=1";
-    var apiurl=str1.concat(searchEncoded, str2);  
-//alert(apiurl);
+    var apiurl=str1.concat(searchEncoded, str2);
 
     $.ajax({
     url: apiurl,
     success: function(result){
         Lat = result.results[0].LATITUDE;
         Lng = result.results[0].LONGITUDE;
-        //moveToLoc(Lat,Lng);
     }});
     
-setTimeout(function(){ alert('ver2.1: '+Lat+','+Lng); }, 5000);
+setTimeout(function(){ moveToLoc(Lat,Lng); }, 2000);
 }
 
 function getsearchval(){
