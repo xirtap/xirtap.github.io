@@ -5,8 +5,6 @@ var map = L.Wrld.map("map", "da70b0d2173a3f3f5299df3692507b57", {
     center: [homeLat,homeLng],
     zoom: 18
     });
-var marker = L.marker([homeLat,homeLng]).addTo(map);
-
 
 function getLocation() {
     if (navigator.geolocation) {
@@ -22,11 +20,12 @@ function moveToLoc(Lat,Long) {
         animate: true,
         durationSeconds:5
     });
-    marker = L.marker(Lat,Long).addTo(map);
+    var mker = L.marker(Lat,Long).addTo(map);
 }
 
 function showPosition(position) {
     moveToLoc(position.coords.latitude,position.coords.longitude);
+    var marker = L.marker([position.coords.latitude,position.coords.longitude]).addTo(map);
     
     var today = new Date();
     var hours = today.getHours();
