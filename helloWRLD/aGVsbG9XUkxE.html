@@ -2,22 +2,26 @@
 <html>
 
 <head>
-
-<title>helloWRLD</title>
+<title>helloWRLD by Patrick Lim</title>
 <script src="https://cdn-webgl.wrld3d.com/wrldjs/dist/latest/wrld.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.1/leaflet.css" rel="stylesheet" />
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.7.2.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="styles.css">
 </head>
 
 <body onload="getLocation()">
-    <p id="demo"></p>
+    <div class="topnav">
+            <a class="active" onclick="balikkampung()" href="#">Home</a>
+            <div class="search-container">
+                <input type="text" placeholder="Search.." name="searchval" id="searchval">
+                <button type="button" onclick="getsearchval()"><i class="fa fa-search"></i></button>
+            </div>
+    </div>
+
     <div class="container" id="map"></div>
-    
     <script src="https://xirtap.github.io/helloWRLD/patrick.js"></script>
 
-    <a href="https://xirtap.github.io/helloWRLD/aGVsbG9IT01F.html">
-        <img src="b.jpg" class="over-img"/>
-    </a>
 </body>
 
 </html>
