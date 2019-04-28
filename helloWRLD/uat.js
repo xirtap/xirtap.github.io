@@ -1,8 +1,10 @@
+var homeLat=1.3490;
+var homeLng=103.8391;
 var map = L.Wrld.map("map", "da70b0d2173a3f3f5299df3692507b57", {
-    center: [1.3490,103.8391],
+    center: [homeLat,homeLng],
     zoom: 18
     });
-var marker = L.marker([1.3490,103.8391]).addTo(map);
+var marker = L.marker([homeLat,homeLng]).addTo(map);
 
 
 function getLocation() {
@@ -64,3 +66,8 @@ function getsearchval(){
     var searchEncoded = encodeURIComponent(search);
     Cloud(searchEncoded);
 }    
+
+
+function balikkampung(){
+    setTimeout(function(){ moveToLoc(homeLat,homeLng); }, 2000);
+}  
