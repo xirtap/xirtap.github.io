@@ -27,7 +27,6 @@ function moveToLoc(Lat,Long) {
 
 function showPosition(position) {
     moveToLoc(position.coords.latitude,position.coords.longitude);
-    marker = L.marker([position.coords.latitude,position.coords.longitude]).addTo(map);
     
     var today = new Date();
     var hours = today.getHours();
