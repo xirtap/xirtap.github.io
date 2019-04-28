@@ -1,5 +1,6 @@
 var homeLat=1.3490;
 var homeLng=103.8391;
+var apidelay=1000;
 var map = L.Wrld.map("map", "da70b0d2173a3f3f5299df3692507b57", {
     center: [homeLat,homeLng],
     zoom: 18
@@ -21,7 +22,7 @@ function moveToLoc(Lat,Long) {
         animate: true,
         durationSeconds:5
     });
-    var marker = L.marker(Lat,Long).addTo(map);
+    marker = L.marker(Lat,Long).addTo(map);
 }
 
 function showPosition(position) {
@@ -58,7 +59,7 @@ function Cloud(searchEncoded){
         Lng = result.results[0].LONGITUDE;
     }});
     
-setTimeout(function(){ moveToLoc(Lat,Lng); }, 2000);
+setTimeout(function(){ moveToLoc(Lat,Lng); }, apidelay);
 }
 
 function getsearchval(){
@@ -69,5 +70,5 @@ function getsearchval(){
 
 
 function balikkampung(){
-    setTimeout(function(){ moveToLoc(homeLat,homeLng); }, 2000);
+    setTimeout(function(){ moveToLoc(homeLat,homeLng); }, apidelay);
 }  
