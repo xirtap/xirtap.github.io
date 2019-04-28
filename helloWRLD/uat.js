@@ -57,7 +57,7 @@ function Cloud(searchEncoded){
         //moveToLoc(Lat,Lng);
     }});
     
-alert('ver2.1: '+Lat+','+Lng);
+setTimeout(function(){ alert('ver2.1: '+Lat+','+Lng); }, 5000);
 }
 
 function getsearchval(){
