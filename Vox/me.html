@@ -4,31 +4,32 @@
 <head>
     <meta charset=UTF-8>
     <meta name=viewport content="width=device-width,initial-scale=1">
-    <title>Web Speech API</title>
+    <title>Patrick's 网络语音识别系统</title>
     <link href="https://fonts.googleapis.com/css?family=Noto+Serif" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
     <div id="wrapper">
-        <span id="unsupported" class="support hidden">Speech API Not Supported</span>
-        <h2>Your Message:</h2>
+        <span id="unsupported" class="support hidden">该设备不支持语音API</span>
+        <h2>Patrick's 语音识别系统</h2>
         <div id="typeOfInput">
-            <span>Results:</span>
+            <span>文字:</span>
             <label>
-                <input type=radio name=recognition-type value=final> Final speech</label>
+                <input type=radio name=recognition-type value=final disabled>  </label>
             <label>
-                <input type=radio name=recognition-type value=interim checked> As you speak</label>
+                <input type=radio name=recognition-type value=interim checked>  </label>
         </div>
         <textarea id="transcription" readonly></textarea>
         <br/>
 
-        <button id="clear-all" class="button">Clear Text</button>
+        <button id="clear-all" class="button">清除文字</button>
+        <button id="copy-all" class="button">复制文字</button>        
 
         <div class="button-wrapper">
             <div id="speechButton" class="start"></div>
         </div>
-        <div id="log">Click to start speaking</div>
+        <div id="log">点击后开始说话</div>
     </div>
     <script>
         ////// Variable holding interface elements
@@ -36,6 +37,7 @@
         var log = document.getElementById('log');
         var start = document.getElementById('speechButton');
         var clear = document.getElementById('clear-all');
+        var copy = document.getElementById('copy-all');
         var speaking = false;
 
         ////// Is speech supported?
@@ -62,7 +64,7 @@
             };
             // Listen for errors
             recognizer.onerror = function(event) {
-                log.innerHTML = 'Recognition error: ' + event.message + '<br />' + log.innerHTML;
+                log.innerHTML = '系统故障: ' + event.message + '<br />' + log.innerHTML;
             };
 
             start.addEventListener('click', function() {
@@ -75,20 +77,24 @@
                     try {
                         recognizer.lang = 'cmn-Hans-CN';
                         recognizer.start();
-                        log.innerHTML = 'Start speaking now<br/>Click to stop';
+                        log.innerHTML = '请开始讲话<br/>点击停止';
                     } catch (ex) {
-                        log.innerHTML = 'Recognition error:<br/>' + ex.message;
+                        log.innerHTML = '系统故障:<br/>' + ex.message;
                     }
                 } else {
                     recognizer.stop();
                     start.classList.toggle('stop');
-                    log.innerHTML = 'Recognition stopped<br/>Click to speak';
+                    log.innerHTML = '识别已停止<br/>点击说话';
                     speaking = false;
                 }
             });
             clear.addEventListener('click', function() {
                 transcription.textContent = '';
             });
+            copy.addEventListener('click', function() {
+                transcription.select();
+                document.execCommand("copy");
+            });            
         }
 
     </script>
