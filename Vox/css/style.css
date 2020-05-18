@@ -16,7 +16,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
     background: #f64f59;
     background: -webkit-linear-gradient(to bottom, #d16d73, #ad8ebc);
-    background: linear-gradient(to bottom, #a906f8, #d694f6);
+    background: linear-gradient(to bottom, #d16d73, #ad8ebc);
 }
 h1 {
     font-size: 3em;
@@ -118,3 +118,7 @@ p {
     cursor: pointer;
     border-radius: 4px;
 }
+
+input {
+    display: none;
+  }
