@@ -29,7 +29,7 @@
         <div class="button-wrapper">
             <div id="speechButton" class="start"></div>
         </div>
-        <div id="log">点击后开始说话</div>
+        <div id="log">点击后请开始说话</div>
     </div>
     <script>
         ////// Variable holding interface elements
@@ -50,10 +50,10 @@
         } else {
             var recognizer = new window.SpeechRecognition();
             // Recogniser doesn't stop listening even if the user pauses
-            recognizer.continuous = true;
+            recognizer.continuous = false;
             // Start recognising
             recognizer.onresult = function(event) {
-                transcription.textContent = '';
+                //transcription.textContent = '';
                 for (var i = event.resultIndex; i < event.results.length; i++) {
                     if (event.results[i].isFinal) {
                         transcription.textContent = event.results[i][0].transcript;
@@ -69,24 +69,25 @@
 
             start.addEventListener('click', function() {
                 //toggle
-                if (!speaking) {
+                //if (!speaking) {
                     speaking = true;
-                    start.classList.toggle('stop');
+                    // start.classList.toggle('stop');
                     // Set if we need interim results
                     recognizer.interimResults = document.querySelector('input[name="recognition-type"][value="interim"]').checked;
                     try {
                         recognizer.lang = 'cmn-Hans-CN';
                         recognizer.start();
-                        log.innerHTML = '请开始讲话<br/>点击停止';
+                        //log.innerHTML = '请开始对着麦克风讲话<br/>点击停止与删除文字';
                     } catch (ex) {
                         log.innerHTML = '系统故障:<br/>' + ex.message;
                     }
-                } else {
+                /*} else {
                     recognizer.stop();
                     start.classList.toggle('stop');
-                    log.innerHTML = '识别已停止<br/>点击说话';
+                    transcription.textContent = '';
+                    log.innerHTML = '识别已停止<br/>点击启动麦克风';
                     speaking = false;
-                }
+                } */
             });
             clear.addEventListener('click', function() {
                 transcription.textContent = '';
