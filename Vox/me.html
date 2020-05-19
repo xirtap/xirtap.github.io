@@ -23,7 +23,6 @@
         <textarea id="transcription" readonly></textarea>
         <br/>
 
-        <button id="clear-all" class="button">清除文字</button>
         <button id="copy-all" class="button">复制文字</button>        
 
         <div class="button-wrapper">
@@ -36,7 +35,6 @@
         var transcription = document.getElementById('transcription');
         var log = document.getElementById('log');
         var start = document.getElementById('speechButton');
-        var clear = document.getElementById('clear-all');
         var copy = document.getElementById('copy-all');
         var speaking = false;
 
@@ -89,9 +87,7 @@
                     speaking = false;
                 } */
             });
-            clear.addEventListener('click', function() {
-                transcription.textContent = '';
-            });
+
             copy.addEventListener('click', function() {
                 transcription.select();
                 document.execCommand("copy");
