@@ -1,100 +1,25 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <meta charset=UTF-8>
-    <meta name=viewport content="width=device-width,initial-scale=1">
-    <title>Patrick's 网络语音识别系统</title>
-    <link href="https://fonts.googleapis.com/css?family=Noto+Serif" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+        <title>Patrick's 网络语音识别系统</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="网络语音识别系统">
+        <style>
+            body {
+                margin: 0;            /* Reset default margin */
+            }
+            iframe {
+                display: block;       /* iframes are inline by default */
+                background: #000;
+                border: none;         /* Reset default border */
+                height: 100vh;        /* Viewport-relative units */
+                width: 100vw;
+            }
+        </style>
 </head>
 
 <body>
-    <div id="wrapper">
-        <span id="unsupported" class="support hidden">该设备不支持语音API</span>
-        <h2>Patrick's 语音识别系统</h2>
-        <div id="typeOfInput">
-            <span>文字:</span>
-            <label>
-                <input type=radio name=recognition-type value=final disabled>  </label>
-            <label>
-                <input type=radio name=recognition-type value=interim checked>  </label>
-        </div>
-        <textarea id="transcription" readonly></textarea>
-        <br/>
-
-        <button id="copy-all" class="button">复制文字</button>        
-
-        <div class="button-wrapper">
-            <div id="speechButton" class="start"></div>
-        </div>
-        <div id="log">点击后请开始说话</div>
-    </div>
-    <script>
-        ////// Variable holding interface elements
-        var transcription = document.getElementById('transcription');
-        var log = document.getElementById('log');
-        var start = document.getElementById('speechButton');
-        var copy = document.getElementById('copy-all');
-        var speaking = false;
-
-        ////// Is speech supported?
-        window.SpeechRecognition = window.SpeechRecognition ||
-            window.webkitSpeechRecognition ||
-            null;
-        if (window.SpeechRecognition === null) {
-            document.getElementById('unsupported').classList.remove('hidden');
-            start.classList.add('hidden');
-        } else {
-            var recognizer = new window.SpeechRecognition();
-            // Recogniser doesn't stop listening even if the user pauses
-            recognizer.continuous = false;
-            // Start recognising
-            recognizer.onresult = function(event) {
-                //transcription.textContent = '';
-                for (var i = event.resultIndex; i < event.results.length; i++) {
-                    if (event.results[i].isFinal) {
-                        transcription.textContent = event.results[i][0].transcript;
-                    } else {
-                        transcription.textContent += event.results[i][0].transcript;
-                    }
-                }
-            };
-            // Listen for errors
-            recognizer.onerror = function(event) {
-                log.innerHTML = '系统故障: ' + event.message + '<br />' + log.innerHTML;
-            };
-
-            start.addEventListener('click', function() {
-                //toggle
-                //if (!speaking) {
-                    speaking = true;
-                    // start.classList.toggle('stop');
-                    // Set if we need interim results
-                    recognizer.interimResults = document.querySelector('input[name="recognition-type"][value="interim"]').checked;
-                    try {
-                        recognizer.lang = 'cmn-Hans-CN';
-                        recognizer.start();
-                        //log.innerHTML = '请开始对着麦克风讲话<br/>点击停止与删除文字';
-                    } catch (ex) {
-                        log.innerHTML = '系统故障:<br/>' + ex.message;
-                    }
-                /*} else {
-                    recognizer.stop();
-                    start.classList.toggle('stop');
-                    transcription.textContent = '';
-                    log.innerHTML = '识别已停止<br/>点击启动麦克风';
-                    speaking = false;
-                } */
-            });
-
-            copy.addEventListener('click', function() {
-                transcription.select();
-                document.execCommand("copy");
-            });            
-        }
-
-    </script>
+    <iframe height="100%" width="100%" src="https://xirtap.github.io/Vox/U2FsdGVkX19qS0yZfjF1fgNP2d1zbgYc.html" style="border:none;" frameborder="0" allowfullscreen></iframe>
 </body>
 
 </html>
