@@ -15,8 +15,8 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background: #f64f59;
-    background: -webkit-linear-gradient(to bottom, #d16d73, #ad8ebc);
-    background: linear-gradient(to bottom, #d16d73, #ad8ebc);
+    background: -webkit-linear-gradient(to bottom, #4da6ff, #ff66b3);
+    background: linear-gradient(to bottom, #4da6ff, #ff66b3);
 }
 h1 {
     font-size: 3em;
