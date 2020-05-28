@@ -68,6 +68,7 @@ if (window.SpeechRecognition === null) {
 		var apiurl="https://glosbe.com/transliteration/api?from=Han&dest=Latin&format=json&text="+decodeURIComponent(transcription.value);
 
 		$.ajax({
+		headers: {  'Access-Control-Allow-Origin': 'https://xirtap.github.io' },
 		url: apiurl,
 		success: function(result){
 			hanyu.value=result;
