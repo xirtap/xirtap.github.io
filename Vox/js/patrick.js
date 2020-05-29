@@ -4,6 +4,8 @@ var transcription = document.getElementById('transcription');
 var log = document.getElementById('log');
 var start = document.getElementById('speechButton');
 var copy = document.getElementById('copy-all');
+var translatehanyu = document.getElementById('hanyu');
+var displaypinyin = document.getElementById('hanyupinyin');
 var speaking = false;
 
 ////// Is speech supported?
@@ -61,6 +63,24 @@ if (window.SpeechRecognition === null) {
 	copy.addEventListener('click', function() {
 		transcription.select();
 		document.execCommand("copy");
-	});            
+	});
+
+	function glosbe(searchChi){
+		var apiurl="https://glosbe.com/transliteration/api?from=Han&dest=Latin&format=json&text="+decodeURIComponent(transcription.value);
+
+		$.ajax({
+		crossDomain: true,
+		dataType: 'jsonp',			
+		headers: {  'Access-Control-Allow-Origin': 'https://xirtap.github.io' },
+		url: apiurl,
+		success: function(result){
+			//alert('汉语拼音:'+result.text);
+			displaypinyin.innerHTML = '汉语拼音: '+result.text;
+		}});
+	}
+
+	translatehanyu.addEventListener('click', function() {
+		glosbe(transcription.value);
+	});	
 }
 
