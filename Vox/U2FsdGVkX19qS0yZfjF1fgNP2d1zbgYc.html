@@ -5,6 +5,7 @@
     <meta charset=UTF-8>
     <meta name=viewport content="width=device-width,initial-scale=1">
     <title>Patrick's 网络语音识别系统</title>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-1.7.2.min.js"></script>	
     <link href="https://fonts.googleapis.com/css?family=Noto+Serif" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -12,7 +13,7 @@
 <body>
     <div id="wrapper">
         <span id="unsupported" class="support hidden">该设备不支持语音API</span>
-        <h2>语音识别系统</h2>
+        <h2>Patrick's 语音识别系统</h2>
         <div id="typeOfInput">
             <span>文字:</span>
             <label>
@@ -23,15 +24,21 @@
         <textarea id="transcription" readonly></textarea>
         <br/>
 
+		<button id="hanyu" class="button">翻译成汉语拼音</button>  
         <button id="copy-all" class="button">复制文字</button>        
 
         <div class="button-wrapper">
             <div id="speechButton" class="start"></div>
         </div>
         <div id="log">点击后请开始说话</div>
+		<br/>
+		<h3><p id="hanyupinyin"></p></h3>
+        <br/>
     </div>
 	<script src="js/patrick.js"></script>
-
+	<footer>
+		Version 1.0 (May 2020)
+	</footer>
 </body>
 
 </html>
