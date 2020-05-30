@@ -119,6 +119,10 @@ p {
     border-radius: 4px;
 }
 
+#hanyupinyin{
+	text-align: center;
+}
+
 input {
     display: none;
   }
