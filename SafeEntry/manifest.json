@@ -1,10 +1,10 @@
 {
-  "name": "Patrick's Safe Entry Collection",
-  "short_name": "Pat's Safe Entry Collection",
+  "name": "Patrick's Safe Entry Site",
+  "short_name": "My Safe Entry Site",
   "start_url": "a.html",
   "display": "standalone",
-  "background_color": "#99FFCC",
-  "theme_color": "#99FFCC", 
+  "background_color": "#CCCCFF",
+  "theme_color": "#CCCCFF", 
   "orientation": "portrait-primary",
   "icons": [
     {
