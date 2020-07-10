@@ -46,6 +46,8 @@ if (window.SpeechRecognition === null) {
 			try {
 				recognizer.lang = 'cmn-Hans-CN';
 				recognizer.start();
+				transcription.innerHTML ='';
+				displaypinyin.innerHTML ='';
 				//log.innerHTML = '请开始对着麦克风讲话<br/>点击停止与删除文字';
 			} catch (ex) {
 				log.innerHTML = '系统故障:<br/>' + ex.message;
