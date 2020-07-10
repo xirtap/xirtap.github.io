@@ -1,4 +1,7 @@
-body {background-color: #CCCCFF;}
+body {
+  background-color: Gainsboro;
+  color:Teal;
+}
 
 div.w3-container {
     line-height: 1cm;
