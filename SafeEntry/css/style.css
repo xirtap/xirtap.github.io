@@ -1,12 +1,33 @@
 body {
-  background-color: Gainsboro;
-  color:Teal;
+	background-color: #cedde3;
+	color:Teal;
+
+	align-items: center;
+	display: grid;
+	grid-template-columns: auto;
+	padding: 7px;
+	height: 50vh;
+	justify-content: center;
+	font-family: 'Alata';font-size: 18px;color:#c2c2c2;  
 }
 
-div.w3-container {
-    line-height: 1cm;
+h3 {
+	color:Teal;
+    text-align: center;
+	font-weight: bold;
   }
 
-h3 {
-    text-align: center;
-  }
+.btn {
+border-radius: 14px;
+background: linear-gradient(145deg, #b9c7cc, #dcecf3);
+box-shadow:  10px 10px 28px #a3afb3, 
+             -10px -10px 28px #f9ffff;
+	padding-top: 8px;
+	height: 40px;
+	width: 600px;
+	justify-content: center;
+
+	text-decoration: none;
+	color: Teal;
+	text-align:center;
+}
