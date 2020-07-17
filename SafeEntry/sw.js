@@ -3,7 +3,6 @@ const assets = [
   'a.html',
   'js/patrick.js',
   'css/style.css',
-  'https://www.w3schools.com/w3css/4/w3.css',
   'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.3.1/gsap.min.js',
 ];
 // install event
