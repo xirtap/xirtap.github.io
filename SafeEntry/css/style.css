@@ -31,5 +31,9 @@ box-shadow:  10px 10px 28px #a3afb3,
 	text-decoration: none;
 	color: Teal;
 	text-align:center;
-
 }
+
+footer {
+	color:Black;
+	font-family: 'Butterfly Kids';font-size: 24px;
+  }
