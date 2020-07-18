@@ -34,6 +34,22 @@ box-shadow:  8px 8px 16px #b3c0c5,
 	text-align:center;
 }
 
+.press {
+border-radius: 50px;
+background: #cedde3;
+box-shadow: inset 20px 20px 60px #afbcc1, 
+            inset -20px -20px 60px #edfeff;
+
+	padding-top: 8px;
+	height: 30px;
+	width: 300px;
+	justify-content: center;
+
+	text-decoration: none;
+	color: Teal;
+	text-align:center;
+}
+
 footer {
 	color:Black;
 	font-family: 'Butterfly Kids';font-size: 24px;
