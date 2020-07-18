@@ -1,5 +1,5 @@
 body {
-	background-color: #cedde3;
+	background-color: #eec8dd;
 	color:Teal;
 
 	align-items: center;
@@ -20,9 +20,9 @@ h3 {
 
 .btn {
 border-radius: 50px;
-background: #cedde3;
-box-shadow:  8px 8px 16px #b3c0c5, 
-             -8px -8px 16px #e9faff;
+background: #eec8dd;
+box-shadow:  8px 8px 16px #caaabc, 
+             -8px -8px 16px #ffe6fe;
 
 	padding-top: 8px;
 	height: 30px;
@@ -36,9 +36,9 @@ box-shadow:  8px 8px 16px #b3c0c5,
 
 .press {
 border-radius: 50px;
-background: #cedde3;
-box-shadow: inset 20px 20px 60px #afbcc1, 
-            inset -20px -20px 60px #edfeff;
+background: #eec8dd;
+box-shadow: inset 20px 20px 60px #caaabc, 
+            inset -20px -20px 60px #ffe6fe;
 
 	padding-top: 8px;
 	height: 30px;
