@@ -9,6 +9,9 @@ var classname = this.document.getElementsByClassName("btn");
 for (var i = 0; i < classname.length; i++) { 
   classname[i].addEventListener('mousedown', function () {
     this.classList.add("press");
-	window.navigator.vibrate([200, 100, 200]);
+	navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
+	if (navigator.vibrate) { 
+		navigator.vibrate([200, 100, 200]); 
+	} 
   }, false);
 }
