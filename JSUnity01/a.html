@@ -6,11 +6,12 @@
     <title>Unity WebGL Player | JS_TEST</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-	<style> 
+	<style>
 	#main{
 	float:right;
 	}
 	</style>
+
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
@@ -30,13 +31,22 @@
         <div id="unity-build-title">JS_TEST</div>
       </div>
     </div>
+	<div id="main"><select onchange="fl(this.value)">
+		<option value =""></option>
+		<option value ="1">sphere</option>
+		<option value ="2">cube</option>
+		<option value ="3">capsule</option>
+		<option value ="4">showall</option>
+		<option value ="5">hideall</option>
+	</select>
+	</div>
     <script>
       var buildUrl = "Build";
       var loaderUrl = buildUrl + "/webgl.loader.js";
       var config = {
-        dataUrl: buildUrl + "/webgl.data.gz",
-        frameworkUrl: buildUrl + "/webgl.framework.js.gz",
-        codeUrl: buildUrl + "/webgl.wasm.gz",
+        dataUrl: buildUrl + "/webgl.data",
+        frameworkUrl: buildUrl + "/webgl.framework.js",
+        codeUrl: buildUrl + "/webgl.wasm",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "JS_TEST",
@@ -79,19 +89,9 @@
       };
       document.body.appendChild(script);
 	  
-	  function fl(value){
-		gameinstance.SendMessage("Main Camera","ctrl",value);
-	  }
-	  
+		function fl(value){
+			unityInstance.SendMessage("Main Camera","ctrl",value);
+		}	  
     </script>
-	
-	<div id="main"><select onchange="fl(this.value)">
-	<option value = ""></option>
-	<option value = "1">sphere</option>
-	<option value = "2">cube</option>
-	<option value = "3">capsule</option>
-	<option value = "4">showall</option>
-	<option value = "5">hideall</option>
-	
   </body>
 </html>
