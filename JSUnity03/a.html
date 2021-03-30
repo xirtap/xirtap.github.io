@@ -15,18 +15,21 @@
 			gameInstance.SendMessage("Nav","ctrl",value);
 		}
     </script>
+	<style>
+	#main{
+	float:right;
+	}
+	</style>	
 </head>
 <body>
 <div class="webgl-content">
     <div id="gameContainer" style="width: 1280px; height: 720px"></div>
 	
 	<div id="main"><select onchange="fl(this.value)">
-		<option value =""></option>
-		<option value ="1">sphere</option>
-		<option value ="2">cube</option>
-		<option value ="3">capsule</option>
-		<option value ="4">showall</option>
-		<option value ="5">hideall</option>
+		<option value ="0"></option>
+		<option value ="1">Left</option>
+		<option value ="2">Right</option>
+		<option value ="3">Forward</option>
 	</select>
 	</div>		
 </div>
