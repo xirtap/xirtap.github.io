@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Hedge Maze 3D</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <script src="TemplateData/UnityProgress.javascript"></script>
+    <script src="Build/UnityLoader.js"></script>
+    <script>
+        var gameInstance = UnityLoader.instantiate("gameContainer", "Build/JS.json", {onProgress: UnityProgress});
+		
+		function fl(value){
+			gameInstance.SendMessage("Nav","ctrl",value);
+		}
+    </script>
+</head>
+<body>
+<div class="webgl-content">
+    <div id="gameContainer" style="width: 1280px; height: 720px"></div>
+	
+	<div id="main"><select onchange="fl(this.value)">
+		<option value =""></option>
+		<option value ="1">sphere</option>
+		<option value ="2">cube</option>
+		<option value ="3">capsule</option>
+		<option value ="4">showall</option>
+		<option value ="5">hideall</option>
+	</select>
+	</div>		
+</div>
+<div class="simmer">template by: <a href="https://simmer.io" target="_blank">SIMMER.io</a></div>
+<script src="TemplateData/responsive.javascript"></script>
+</body>
+</html>
