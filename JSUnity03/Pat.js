@@ -1,8 +1,4 @@
-// Teachable Machine
-// The Coding Train / Daniel Shiffman
-// https://thecodingtrain.com/TeachableMachine/1-teachable-machine.html
-// https://editor.p5js.org/codingtrain/sketches/PoZXqbu4v
-
+//var gameInstance = UnityLoader.instantiate("gameContainer", "Build/JS.json", {onProgress: UnityProgress});
 // The video
 let video;
 // For displaying the label
@@ -43,19 +39,13 @@ function draw() {
   fill(255);
   text(label, width / 2, height - 16);
 
-  // Pick an emoji, the "default" is train
-  let emoji = "";
-  if (label == "Rainbow") {
-    emoji = "🌈";
-  } else if (label == "Unicorn") {
-    emoji = "🦄";
-  } else if (label == "Ukulele") {
-    emoji = "🎸";
-  }
-
   // Draw the emoji
   textSize(256);
-  text(emoji, width / 2, height / 2);
+//  text(emoji, width / 2, height / 2);
+}
+
+function fl(value){
+	gameInstance.SendMessage("Nav","ctrl",value);
 }
 
 // STEP 3: Get the classification!
