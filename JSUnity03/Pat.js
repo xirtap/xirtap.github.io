@@ -58,4 +58,5 @@ function gotResults(error, results) {
   // Store the label and classify again!
   label = results[0].label;
   classifyVideo();
+  fl(label);
 }
