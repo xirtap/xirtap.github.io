@@ -1,4 +1,4 @@
-//var gameInstance = UnityLoader.instantiate("gameContainer", "Build/JS.json", {onProgress: UnityProgress});
+var gameInstance = UnityLoader.instantiate("gameContainer", "Build/JS.json", {onProgress: UnityProgress});
 // The video
 let video;
 // For displaying the label
