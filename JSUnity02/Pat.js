@@ -62,8 +62,10 @@ function gotResults(error, results) {
   switch(label){
 	case "Left":
 		outresult="1";
+		break;
 	case "Right":
 		outresult="2";
+		break;
 	case "straight"
 		outresult="3";
   }
