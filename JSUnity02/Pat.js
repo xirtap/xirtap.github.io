@@ -60,10 +60,10 @@ function gotResults(error, results) {
   classifyVideo();
   var outresult
   switch(label){
-	case "Left":
+	case "left":
 		outresult="1";
 		break;
-	case "Right":
+	case "right":
 		outresult="2";
 		break;
 	case "straight":
