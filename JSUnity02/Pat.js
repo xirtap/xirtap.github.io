@@ -66,7 +66,7 @@ function gotResults(error, results) {
 	case "Right":
 		outresult="2";
 		break;
-	case "straight"
+	case "straight":
 		outresult="3";
   }
   document.getElementById("demo").innerHTML = "Result is " + label + "outresult is " + outresult;
