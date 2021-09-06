@@ -70,7 +70,7 @@ function gotResults(error, results) {
 		outresult="3";
 		break;
 	default:
-	        outresult="0";
+	        outresult="5";
   }
   document.getElementById("demo").innerHTML = "Result is " + label + "outresult is " + outresult;
   //fl(label);
