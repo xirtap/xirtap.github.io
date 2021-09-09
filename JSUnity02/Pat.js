@@ -45,7 +45,8 @@ function draw() {
 }
 
 function fl(value){
-	gameInstance.SendMessage("Nav","ctrl",value);
+	//gameInstance.SendMessage("Nav","ctrl",value);
+	gameInstance.SendMessage("Main Camera","ctrl",value);
 }
 
 // STEP 3: Get the classification!
