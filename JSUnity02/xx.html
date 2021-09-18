@@ -11,14 +11,6 @@
     <link rel="stylesheet" href="TemplateData/style.css">
     <script src="TemplateData/UnityProgress.js"></script>
     <script src="Build/UnityLoader.js"></script>
-
-    <script>
-	    var gameInstance=UnityLoader.Instantiate("gameContainer","Build/webgl.json", {onProgress: UnityProgress});
-		
-		function fl(outresult){
-			gameInstance.SendMessage("Main Camera","ctrl",outresult);
-		}	  
-    </script>
 	  	    
   </head>
   <body>
