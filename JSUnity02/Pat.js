@@ -1,5 +1,5 @@
 //var gameInstance = UnityLoader.instantiate("gameContainer", "Build/JS.json", {onProgress: UnityProgress});
-var gameInstance = UnityLoader.instantiate("unityContainer", "Build/webgl.json", {onProgress: UnityProgress});
+
 // The video
 let video;
 // For displaying the label
@@ -45,6 +45,8 @@ function draw() {
 //  text(emoji, width / 2, height / 2);
 }
 
+var gameInstance = UnityLoader.instantiate("unityContainer", "Build/webgl.json", {onProgress: UnityProgress});
+
 function fl(value){
 	//gameInstance.SendMessage("Nav","ctrl",value);
 	gameInstance.SendMessage("Main Camera","ctrl",value);
@@ -75,5 +77,5 @@ function gotResults(error, results) {
 	        outresult="5";
   }
   document.getElementById("demo").innerHTML = "Result is " + label + "outresult is " + outresult;
-  //fl(label);
+  fl(label);
 }
