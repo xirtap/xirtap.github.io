@@ -45,7 +45,14 @@ function draw() {
 //  text(emoji, width / 2, height / 2);
 }
 
+/*
 var gameInstance = UnityLoader.instantiate("unityContainer", "Build/webgl.json", {onProgress: UnityProgress});
+
+function fl(value){
+	//gameInstance.SendMessage("Nav","ctrl",value);
+	gameInstance.SendMessage("Main Camera","ctrl",value);
+}
+*/
 
 // STEP 3: Get the classification!
 function gotResults(error, results) {
@@ -73,9 +80,4 @@ function gotResults(error, results) {
   }
   document.getElementById("demo").innerHTML = "Result is " + label + "outresult is " + outresult;
   //fl(label);
-}
-
-function fl(value){
-	//gameInstance.SendMessage("Nav","ctrl",value);
-	gameInstance.SendMessage("Main Camera","ctrl",value);
 }
