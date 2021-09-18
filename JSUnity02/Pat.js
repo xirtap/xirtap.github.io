@@ -45,14 +45,15 @@ function draw() {
 //  text(emoji, width / 2, height / 2);
 }
 
-/*
-var gameInstance = UnityLoader.instantiate("unityContainer", "Build/webgl.json", {onProgress: UnityProgress});
 
-function fl(value){
+var gameInstance = UnityLoader.instantiate("unityContainer", "Build/webgl.json", {onProgress: UnityProgress});
+var outresult;
+
+function fl(outresult){
 	//gameInstance.SendMessage("Nav","ctrl",value);
-	gameInstance.SendMessage("Main Camera","ctrl",value);
+	gameInstance.SendMessage("Main Camera","ctrl",outresult);
 }
-*/
+
 
 // STEP 3: Get the classification!
 function gotResults(error, results) {
@@ -64,7 +65,7 @@ function gotResults(error, results) {
   // Store the label and classify again!
   label = results[0].label;
   classifyVideo();
-  var outresult
+  
   switch(label){
 	case "left":
 		outresult="1";
@@ -78,6 +79,6 @@ function gotResults(error, results) {
 	default:
 	        outresult="5";
   }
-  document.getElementById("demo").innerHTML = "Result is " + label + "outresult is " + outresult;
+  document.getElementById("demo").innerHTML = "Result is " + label + "; outresult is " + outresult;
   //fl(label);
 }
