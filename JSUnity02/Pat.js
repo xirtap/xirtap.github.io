@@ -70,13 +70,18 @@ function gotResults(error, results) {
 	default:
 	        outresult="5";
   }
-  document.getElementById("demo").innerHTML = "Result is " + label + "; outresult is " + outresult;
+  value=outresult;
+  document.getElementById("demo").innerHTML = "Result is " + label + "; outresult is " + outresult + "; Value is " + value;
   //fl(label);
+  
 }
 
+/*
 var gameInstance = UnityLoader.instantiate("unityContainer", "Build/webgl.json", {onProgress: UnityProgress});
 
 function fl(outresult){
 	//gameInstance.SendMessage("Nav","ctrl",value);
 	gameInstance.SendMessage("Main Camera","ctrl",outresult);
 }
+*/
+
