@@ -47,7 +47,7 @@ function draw() {
 
 
 // STEP 3: Get the classification!
-function gotResults(error, results) {
+var x = setInterval(function gotResults(error, results) {
   // Something went wrong!
   if (error) {
     console.error(error);
@@ -72,16 +72,16 @@ function gotResults(error, results) {
   }
   value=outresult;
   document.getElementById("demo").innerHTML = "Result is " + label + "; outresult is " + outresult + "; Value is " + value;
-  //fl(label);
+  fl(label);
   
-}
+}, 1000);
 
-/*
+
 var gameInstance = UnityLoader.instantiate("unityContainer", "Build/webgl.json", {onProgress: UnityProgress});
 
 function fl(outresult){
 	//gameInstance.SendMessage("Nav","ctrl",value);
 	gameInstance.SendMessage("Main Camera","ctrl",outresult);
 }
-*/
+
 
