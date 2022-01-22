@@ -43,7 +43,7 @@ function setZodiac(y){
 
 var opened = 0;
 var found = 0;
-var tempArray = [ '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12','03' ]
+var tempArray = [ '01', '02', '03', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12' ]
 
 tempArray.shuffle();
 
