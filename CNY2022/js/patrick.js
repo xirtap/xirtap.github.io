@@ -165,91 +165,91 @@ function chk(x){
 
 var cf001 = document.querySelector('#cf1');
 var zcf001 = document.querySelector('#zc01');
-cf001.addEventListener('click', function () {
+cf001.addEventListener('mouseenter', function () {
     zcf001.emit('spiner');    
     chk(1);
 });
 
 var cf002 = document.querySelector('#cf2');
 var zcf002 = document.querySelector('#zc02');
-cf002.addEventListener('click', function () {
+cf002.addEventListener('mouseenter', function () {
     zcf002.emit('spiner');    
     chk(2);
 });
 
 var cf003 = document.querySelector('#cf3');
 var zcf003 = document.querySelector('#zc03');
-cf003.addEventListener('click', function () {
+cf003.addEventListener('mouseenter', function () {
     zcf003.emit('spiner');    
     chk(3);
 });
 
 var cf004 = document.querySelector('#cf4');
 var zcf004 = document.querySelector('#zc04');
-cf004.addEventListener('click', function () {
+cf004.addEventListener('mouseenter', function () {
     zcf004.emit('spiner');    
     chk(4);
 });
 
 var cf005 = document.querySelector('#cf5');
 var zcf005 = document.querySelector('#zc05');
-cf005.addEventListener('click', function () {
+cf005.addEventListener('mouseenter', function () {
     zcf005.emit('spiner');    
     chk(5);
 });
 
 var cf006 = document.querySelector('#cf6');
 var zcf006 = document.querySelector('#zc06');
-cf006.addEventListener('click', function () {
+cf006.addEventListener('mouseenter', function () {
     zcf006.emit('spiner');    
     chk(6);
 });
 
 var cf007 = document.querySelector('#cf7');
 var zcf007 = document.querySelector('#zc07');
-cf007.addEventListener('click', function () {
+cf007.addEventListener('mouseenter', function () {
     zcf007.emit('spiner');    
     chk(7);
 });
 
 var cf008 = document.querySelector('#cf8');
 var zcf008 = document.querySelector('#zc08');
-cf008.addEventListener('click', function () {
+cf008.addEventListener('mouseenter', function () {
     zcf008.emit('spiner');    
     chk(8);
 });
 
 var cf009 = document.querySelector('#cf9');
 var zcf009 = document.querySelector('#zc09');
-cf009.addEventListener('click', function () {
+cf009.addEventListener('mouseenter', function () {
     zcf009.emit('spiner');    
     chk(9);
 });
 
 var cf010 = document.querySelector('#cf10');
 var zcf010 = document.querySelector('#zc10');
-cf010.addEventListener('click', function () {
+cf010.addEventListener('mouseenter', function () {
     zcf010.emit('spiner');    
     chk(10);
 });
 
 var cf011 = document.querySelector('#cf11');
 var zcf011 = document.querySelector('#zc11');
-cf011.addEventListener('click', function () {
+cf011.addEventListener('mouseenter', function () {
     zcf011.emit('spiner');    
     chk(11);
 });
 
 var cf012 = document.querySelector('#cf12');
 var zcf012 = document.querySelector('#zc12');
-cf012.addEventListener('click', function () {
+cf012.addEventListener('mouseenter', function () {
     zcf012.emit('spiner');    
     chk(12);
 }); 
 
 var cf013 = document.querySelector('#cf13');
 var zcf013 = document.querySelector('#zc13');
-cf013.addEventListener('click', function () {
+cf013.addEventListener('mouseenter', function () {
     zcf013.emit('spiner');    
     chk(13);
 }); 
