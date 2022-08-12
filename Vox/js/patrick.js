@@ -68,7 +68,7 @@ if (window.SpeechRecognition === null) {
 	});
 
 	function glosbe(searchChi){
-		var apiurl="https://glosbe.com/transliteration/api?from=Han&dest=Latin&format=json&text="+decodeURIComponent(transcription.value);
+		var apiurl="https://helloacm.com/api/pinyin/?cached&s="+decodeURIComponent(transcription.value);
 
 		$.ajax({
 		crossDomain: true,
