@@ -67,7 +67,7 @@ if (window.SpeechRecognition === null) {
 		document.execCommand("copy");
 	});
 
-	function glosbe(searchChi){
+	function pinyin(searchChi){
 		var apiurl="https://helloacm.com/api/pinyin/?cached&s="+decodeURIComponent(transcription.value);
 
 		$.ajax({
@@ -82,7 +82,7 @@ if (window.SpeechRecognition === null) {
 	}
 
 	translatehanyu.addEventListener('click', function() {
-		glosbe(transcription.value);
+		pinyin(transcription.value);
 	});	
 }
 
