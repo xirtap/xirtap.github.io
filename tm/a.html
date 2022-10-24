@@ -73,6 +73,7 @@ Change counter:<div id="label-test2"></div>
            labelTest.innerHTML = prediction[i].className;
            if (prediction[i].className != prevVal) {
             document.getElementById("label-test2").innerHTML = cntr + 1;
+            prevVal=prediction[i].className;
            }
          }
         }
