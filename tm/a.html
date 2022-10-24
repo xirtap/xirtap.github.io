@@ -68,7 +68,7 @@
             labelContainer.childNodes[i].innerHTML = classPrediction;
         
          if (prediction[i].probability.toFixed(2) > 0.8) {
-           labelTest.childNodes[i].innerHTML = prediction[i].className;
+           labelTest.innerHTML = prediction[i].className;
          }
         }
     }
