@@ -23,8 +23,9 @@ Change counter:<div id="label-test2"></div>
     // the link to your model provided by Teachable Machine export panel
     const URL = "https://teachablemachine.withgoogle.com/models/sJJQ6uL6v/";
 
-    let model, webcam, labelContainer, maxPredictions, labelTest, prevVal;
+    let model, webcam, labelContainer, maxPredictions, labelTest;
     var cntr=0;
+    var prevVal="centre";
   
     // Load the image model and setup the webcam
     async function init() {
