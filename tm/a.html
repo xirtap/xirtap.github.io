@@ -24,13 +24,13 @@ Change counter:<div id="label-test2"></div>
     const URL = "https://teachablemachine.withgoogle.com/models/sJJQ6uL6v/";
 
     let model, webcam, labelContainer, maxPredictions, labelTest;
+    var cntr=0;
+    var prevVal="centre";   
   
     // Load the image model and setup the webcam
     async function init() {
         const modelURL = URL + "model.json";
-        const metadataURL = URL + "metadata.json";
-      var cntr=0;
-      var prevVal="centre";      
+        const metadataURL = URL + "metadata.json";   
 
         // load the model and metadata
         // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
@@ -74,7 +74,8 @@ Change counter:<div id="label-test2"></div>
          if (prediction[i].probability.toFixed(2) > 0.8) {
            labelTest.innerHTML = prediction[i].className;
            if (prediction[i].className != prevVal) {
-            document.getElementById("label-test2").innerHTML = cntr + 1;
+            cntr = cntr + 1;
+            document.getElementById("label-test2").innerHTML = cntr;
             prevVal=prediction[i].className;
            }
          }
