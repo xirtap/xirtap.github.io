@@ -1,0 +1,7 @@
+{
+  "name": "Patrick's Chinese Transcriber",
+  "description": "A Neomorphism-style web app for transcribing Chinese speech and converting it to Hanyu Pinyin using Gemini API.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
