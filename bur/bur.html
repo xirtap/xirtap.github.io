@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bishan Uncle Runner 🏃</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0a; overflow: hidden; font-family: 'Courier New', monospace; }
+  #canvas { display: block; width: 100vw; height: 100vh; }
+  #ui {
+    position: fixed; top: 0; left: 0; right: 0; pointer-events: none;
+    padding: 20px 28px;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    z-index: 10;
+  }
+  .score-block {
+    background: rgba(0,0,0,0.55);
+    border: 2px solid rgba(255,220,80,0.6);
+    border-radius: 12px;
+    padding: 10px 20px;
+    backdrop-filter: blur(8px);
+  }
+  .label {
+    font-size: 10px; letter-spacing: 3px; color: #ffdc50aa;
+    text-transform: uppercase; margin-bottom: 2px;
+  }
+  .value {
+    font-size: 28px; font-weight: bold; color: #ffdc50;
+    text-shadow: 0 0 20px #ffdc5088;
+  }
+  .lives { display: flex; gap: 6px; font-size: 22px; margin-top: 6px; }
+  #speed-bar-wrap {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    width: 220px; pointer-events: none; z-index: 10;
+  }
+  .speed-label { color: #ffdc50aa; font-size: 10px; letter-spacing: 3px; text-align: center; margin-bottom: 6px; }
+  .bar-bg { height: 8px; background: rgba(255,255,255,0.1); border-radius: 99px; }
+  .bar-fill {
+    height: 8px; border-radius: 99px;
+    background: linear-gradient(90deg, #44ff88, #ffdc50, #ff6644);
+    transition: width 0.3s ease;
+    box-shadow: 0 0 12px #44ff8888;
+  }
+  #overlay {
+    position: fixed; inset: 0; z-index: 50;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(6px);
+    transition: opacity 0.4s;
+  }
+  #overlay.hidden { opacity: 0; pointer-events: none; }
+  .game-title {
+    font-size: clamp(32px, 6vw, 64px);
+    font-weight: 900;
+    color: #ffdc50;
+    text-shadow: 0 0 40px #ffdc5066, 0 4px 0 #cc8800;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .game-sub {
+    color: #aaffaa; font-size: 14px; letter-spacing: 4px;
+    margin-bottom: 40px; text-transform: uppercase;
+  }
+  .btn {
+    background: #ffdc50; color: #1a1a00;
+    border: none; border-radius: 99px;
+    padding: 16px 48px; font-size: 18px;
+    font-weight: 900; letter-spacing: 2px;
+    cursor: pointer; pointer-events: all;
+    box-shadow: 0 0 30px #ffdc5066;
+    transition: transform 0.15s, box-shadow 0.15s;
+    text-transform: uppercase;
+  }
+  .btn:hover { transform: scale(1.06); box-shadow: 0 0 50px #ffdc5099; }
+  .tips {
+    margin-top: 32px; color: #ffffff55;
+    font-size: 12px; letter-spacing: 2px;
+    text-align: center; line-height: 2;
+  }
+  .tips span { color: #ffdc5099; }
+  #gameover-score { font-size: 20px; color: #aaffaa; margin-bottom: 28px; letter-spacing: 3px; }
+  #toast {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    color: #fff; font-size: 26px; font-weight: bold;
+    text-shadow: 0 0 20px currentColor;
+    pointer-events: none; z-index: 100;
+    opacity: 0; transition: opacity 0.2s;
+    text-align: center; white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="ui">
+  <div class="score-block">
+    <div class="label">Score</div>
+    <div class="value" id="score">0</div>
+  </div>
+  <div class="score-block">
+    <div class="label">Lives</div>
+    <div class="lives" id="lives">❤️❤️❤️</div>
+  </div>
+  <div class="score-block" style="text-align:center;">
+    <div class="label">Best</div>
+    <div class="value" id="best">0</div>
+    <div style="font-size:11px;color:#ffdc5099;margin-top:4px;">🪙 <span id="coin-count">0</span> coins</div>
+  </div>
+</div>
+<div id="speed-bar-wrap">
+  <div class="speed-label">Speed</div>
+  <div class="bar-bg"><div class="bar-fill" id="speed-bar" style="width:20%"></div></div>
+</div>
+<div id="toast"></div>
+<div id="overlay">
+  <div class="game-title">🏃 BISHAN UNCLE<br>RUNNER</div>
+  <div class="game-sub">Bishan–Ang Mo Kio Park · Singapore</div>
+  <div id="gameover-score" style="display:none"></div>
+  <button class="btn" type="button" id="start-btn" onclick="startGame()">START LAH!</button>
+  <div class="tips">
+    <span>↑ / SPACE / TAP</span> — Jump &nbsp;|&nbsp; <span>↓ / SHIFT</span> — Slide<br>
+    Collect 🪙 coins · dodge joggers, cyclists, bins & otters!<br>
+    Otters & crows may cross your path 🦦🐦 · 🎵 retro tunes playing!
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ─── GLOBALS ───────────────────────────────────────────────────────
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 400);
+camera.position.set(0, 5, 12);
+camera.lookAt(0, 2, 0);
+
+// resize
+window.addEventListener('resize', () => {
+  renderer.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+});
+renderer.setSize(innerWidth, innerHeight);
+
+// ─── STATE ────────────────────────────────────────────────────────
+let gameRunning = false, gameOver = false;
+let score = 0, best = parseInt(localStorage.getItem('bishanBest') || '0');
+let coinsCollected = 0, totalPoints = 0;
+let lives = 3, invincible = false;
+let speed = 11, baseSpeed = 11, maxSpeed = 32;
+let laneX = 0, targetLaneX = 0;
+const LANES = [-2.5, 0, 2.5];
+let currentLane = 1;
+let jumpVelocity = 0, playerY = 0, isJumping = false;
+let isSliding = false, slideTimer = 0;
+let lastObstacleZ = -40;
+let clock = new THREE.Clock();
+let frameCount = 0;
+const toastEl = document.getElementById('toast');
+let toastTimeout;
+
+document.getElementById('best').textContent = best;
+// ─── MATERIALS ────────────────────────────────────────────────────
+const MAT = {
+  path:      new THREE.MeshLambertMaterial({ color: 0x1a1a1a }),   // black tarmac
+  pathEdge:  new THREE.MeshLambertMaterial({ color: 0xffffff }),   // white edge line
+  grass:     new THREE.MeshLambertMaterial({ color: 0x6abf5e }),
+  darkGrass: new THREE.MeshLambertMaterial({ color: 0x4a9e3e }),
+  soil:      new THREE.MeshLambertMaterial({ color: 0x8b6040 }),
+  skin:      new THREE.MeshLambertMaterial({ color: 0xf4a460 }),
+  shirt:     new THREE.MeshLambertMaterial({ color: 0xff6644 }),
+  shorts:    new THREE.MeshLambertMaterial({ color: 0x3366cc }),
+  shoe:      new THREE.MeshLambertMaterial({ color: 0x222222 }),
+  white:     new THREE.MeshLambertMaterial({ color: 0xffffff }),
+  wood:      new THREE.MeshLambertMaterial({ color: 0x8b6914 }),
+  metal:     new THREE.MeshLambertMaterial({ color: 0x888888 }),
+  leaf:      new THREE.MeshLambertMaterial({ color: 0x2d9e2d }),
+  leafLight: new THREE.MeshLambertMaterial({ color: 0x55cc44 }),
+  leafDark:  new THREE.MeshLambertMaterial({ color: 0x1a7a1a }),
+  bush:      new THREE.MeshLambertMaterial({ color: 0x3aaa3a }),
+  bushLight: new THREE.MeshLambertMaterial({ color: 0x66cc44 }),
+  bin:       new THREE.MeshLambertMaterial({ color: 0x336633 }),
+  otter:     new THREE.MeshLambertMaterial({ color: 0x8b6914 }),
+  otterB:    new THREE.MeshLambertMaterial({ color: 0x5c4200 }),
+  otterBelly:new THREE.MeshLambertMaterial({ color: 0xc8a060 }),
+  crow:      new THREE.MeshLambertMaterial({ color: 0x111111 }),
+  water:     new THREE.MeshLambertMaterial({ color: 0x4488cc, transparent: true, opacity: 0.7 }),
+  flower:    new THREE.MeshLambertMaterial({ color: 0xff88cc }),
+  flowerY:   new THREE.MeshLambertMaterial({ color: 0xffee44 }),
+  trunk:     new THREE.MeshLambertMaterial({ color: 0x7a5c2a }),
+  // Female jogger colours
+  fjShirt:   new THREE.MeshLambertMaterial({ color: 0xff88bb }),
+  fjShorts:  new THREE.MeshLambertMaterial({ color: 0xaa55ee }),
+  fjShoe:    new THREE.MeshLambertMaterial({ color: 0xffffff }),
+  fjHair:    new THREE.MeshLambertMaterial({ color: 0x331100 }),
+  fjSkin:    new THREE.MeshLambertMaterial({ color: 0xf0c090 }),
+  // Lamppost
+  lampPole:  new THREE.MeshLambertMaterial({ color: 0x777788 }),
+  lampHead:  new THREE.MeshLambertMaterial({ color: 0x555566 }),
+  // Coin
+  coin:      new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9, roughness: 0.1, emissive: 0xffaa00, emissiveIntensity: 0.3 }),
+  coinEdge:  new THREE.MeshStandardMaterial({ color: 0xcc9900, metalness: 0.9, roughness: 0.15 }),
+};
+
+// ─── LIGHTING ─────────────────────────────────────────────────────
+scene.background = new THREE.Color(0x87ceeb);
+scene.fog = new THREE.Fog(0x87ceeb, 60, 130);
+
+const sun = new THREE.DirectionalLight(0xfff4d6, 1.4);
+sun.position.set(10, 30, 10);
+sun.castShadow = true;
+sun.shadow.camera.near = 0.5;
+sun.shadow.camera.far = 200;
+sun.shadow.camera.left = -30;
+sun.shadow.camera.right = 30;
+sun.shadow.camera.top = 30;
+sun.shadow.camera.bottom = -30;
+sun.shadow.mapSize.set(2048, 2048);
+scene.add(sun);
+scene.add(new THREE.AmbientLight(0xc8e8ff, 0.7));
+scene.add(new THREE.HemisphereLight(0x87ceeb, 0x5cb85c, 0.4));
+
+// ─── GEOMETRY HELPERS ─────────────────────────────────────────────
+function box(w, h, d, mat) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function cyl(rt, rb, h, s, mat) {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, s), mat);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function sph(r, mat) {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), mat);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+
+// ─── TRACK SEGMENTS ───────────────────────────────────────────────
+const SEGMENT_LEN = 20;
+const NUM_SEGS = 12;
+const segments = [];
+
+// Build one tree group (baked, not pooled)
+function makeTreeInline(xOff, zOff, scale) {
+  const g = new THREE.Group();
+  const trunk = cyl(0.22, 0.34, 3.5, 7, MAT.trunk);
+  trunk.position.y = 1.75; g.add(trunk);
+  const canopyMats = [MAT.leaf, MAT.leafLight, MAT.leafDark];
+  for (let i = 0; i < 3; i++) {
+    const r = 2.2 - i * 0.3;
+    const s = sph(r, canopyMats[i % 3]);
+    s.position.y = 3.6 + i * 0.8;
+    s.scale.y = 0.75;
+    g.add(s);
+  }
+  g.position.set(xOff, 0, zOff);
+  g.rotation.y = Math.random() * Math.PI * 2;
+  g.scale.setScalar(scale);
+  return g;
+}
+
+function makeBushInline(xOff, zOff, scale) {
+  const g = new THREE.Group();
+  const mats = [MAT.bush, MAT.bushLight, MAT.leaf];
+  for (let i = 0; i < 4; i++) {
+    const r = 0.45 + Math.random() * 0.3;
+    const b = sph(r, mats[i % 3]);
+    b.position.set((Math.random()-0.5)*0.8, r*0.5, (Math.random()-0.5)*0.6);
+    g.add(b);
+  }
+  g.position.set(xOff, 0, zOff);
+  g.scale.setScalar(scale);
+  return g;
+}
+
+function makeLampInline(xOff, side) {
+  const g = new THREE.Group();
+  const pole = cyl(0.06, 0.06, 4.2, 6, MAT.lampPole);
+  pole.position.y = 2.1; g.add(pole);
+  const arm = box(0.06, 0.06, 0.7, MAT.lampPole);
+  arm.position.set(0, 4.3, 0.3); arm.rotation.x = 0.3; g.add(arm);
+  const lhead = box(0.4, 0.14, 0.22, MAT.lampHead);
+  lhead.position.set(0, 4.28, 0.62); g.add(lhead);
+  const bulb = sph(0.1, new THREE.MeshStandardMaterial({
+    color: 0xfff5cc, emissive: 0xffffaa, emissiveIntensity: 1.2
+  }));
+  bulb.position.set(0, 4.18, 0.62); g.add(bulb);
+  g.position.set(xOff, 0, 0);
+  g.rotation.y = side === -1 ? 0 : Math.PI;
+  return g;
+}
+
+function makeBenchInline(xOff, zOff, side) {
+  const g = new THREE.Group();
+  const seat = box(1.6, 0.1, 0.48, MAT.wood); seat.position.y = 0.48; g.add(seat);
+  for (const lx of [-0.62, 0.62]) {
+    const leg = box(0.09, 0.48, 0.09, MAT.wood); leg.position.set(lx, 0.24, 0); g.add(leg);
+  }
+  const back = box(1.6, 0.44, 0.07, MAT.wood); back.position.set(0, 0.78, -0.22); g.add(back);
+  for (const lx of [-0.72, 0.72]) {
+    const arm = box(0.07, 0.07, 0.5, MAT.metal); arm.position.set(lx, 0.55, 0); g.add(arm);
+  }
+  g.position.set(xOff, 0, zOff);
+  g.rotation.y = side === -1 ? 0.2 : -0.2;
+  return g;
+}
+
+let segSeed = 0; // deterministic variation per segment
+function makeSegment(z) {
+  const grp = new THREE.Group();
+  grp.position.z = z;
+
+  // ── Road surface ──
+  const path = box(8, 0.15, SEGMENT_LEN, MAT.path);
+  path.position.y = -0.08; path.receiveShadow = true; grp.add(path);
+
+  for (const ex of [-3.9, 3.9]) {
+    const edge = box(0.12, 0.16, SEGMENT_LEN, MAT.pathEdge);
+    edge.position.set(ex, -0.07, 0); grp.add(edge);
+  }
+
+  for (const s of [-1, 1]) {
+    const g = box(28, 0.12, SEGMENT_LEN, s === -1 ? MAT.grass : MAT.darkGrass);
+    g.position.set(s * 18, -0.1, 0); g.receiveShadow = true; grp.add(g);
+  }
+
+  for (let lz = -SEGMENT_LEN/2+1; lz < SEGMENT_LEN/2-1; lz += 3.5) {
+    const dash = box(0.1, 0.02, 1.6, new THREE.MeshLambertMaterial({ color: 0xffdd00 }));
+    dash.position.set(0, 0.01, lz); grp.add(dash);
+  }
+  for (let lz = -SEGMENT_LEN/2+1; lz < SEGMENT_LEN/2-1; lz += 3.5) {
+    for (const lx of [-2.5, 2.5]) {
+      const dash = box(0.08, 0.02, 1.2, MAT.white);
+      dash.position.set(lx, 0.01, lz); grp.add(dash);
+    }
+  }
+
+  // ── Baked scenery — both sides, always ──
+  const seed = segSeed++;
+  for (const side of [-1, 1]) {
+    const sx = side;
+    const edgeX = sx * 5.0;   // lamp / bench strip
+    const bushX = sx * 6.6;   // bush strip
+    const treeX = sx * 9.8;   // tree strip
+
+    // Lamppost: one per side per segment, at z=0 of segment
+    grp.add(makeLampInline(edgeX, side));
+
+    // 3 bushes evenly spaced along segment
+    for (const bz of [-7, 0, 7]) {
+      const jitter = ((seed * 17 + bz * 31 + sx * 7) % 10) * 0.2 - 1;
+      const sc = 0.6 + ((seed * 13 + bz * 5) % 10) * 0.04;
+      grp.add(makeBushInline(bushX + sx * (((seed + bz) % 3) * 0.3), bz + jitter, sc));
+    }
+
+    // 2 trees per side
+    for (const tz of [-6, 5]) {
+      const jitter = ((seed * 11 + tz * 7 + sx * 3) % 8) * 0.4 - 1.6;
+      const sc = 0.9 + ((seed * 7 + tz) % 8) * 0.06;
+      grp.add(makeTreeInline(treeX + sx * (((seed + tz) % 4) * 0.5), tz + jitter, sc));
+    }
+
+    // Bench: every other segment, both sides
+    if (seed % 2 === 0) {
+      const bz = ((seed * 3) % 12) - 6;
+      grp.add(makeBenchInline(edgeX + sx * 0.55, bz, side));
+    }
+  }
+
+  scene.add(grp);
+  return { grp, z };
+}
+
+for (let i = 0; i < NUM_SEGS; i++) {
+  segments.push(makeSegment(-i * SEGMENT_LEN));
+}
+
+// ─── REMAINING DECORATIONS (ponds only — scenery now baked into segments) ──
+const treesGroup = new THREE.Group(); scene.add(treesGroup);
+const treePool = [], bushPool = [], benchDecPool = [], lamppostDecPool = [];
+const pondPool = [];
+function makePond() {
+  const g = new THREE.Group();
+  const water = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.2, 2.2, 0.06, 16),
+    new THREE.MeshLambertMaterial({ color: 0x4499dd, transparent: true, opacity: 0.82 })
+  );
+  water.position.y = 0.01; g.add(water);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(2.25, 0.22, 6, 18), MAT.darkGrass);
+  rim.rotation.x = Math.PI / 2; g.add(rim);
+  for (let i = 0; i < 4; i++) {
+    const ang = (i/4)*Math.PI*2;
+    const pad = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.04, 8), MAT.leaf);
+    pad.position.set(Math.cos(ang)*1.2, 0.06, Math.sin(ang)*0.9); g.add(pad);
+  }
+  g.scale.set(1, 1, 0.55);
+  g.visible = false; treesGroup.add(g); return g;
+}
+for (let i = 0; i < 10; i++) pondPool.push(makePond());
+
+const activeDecorations = [];
+let lastPondZ = 0, pondCounter = 0;
+
+function spawnPond(z) {
+  const pond = pondPool.find(p => !p.visible);
+  if (!pond) return;
+  pondCounter++;
+  const side = pondCounter % 2 === 0 ? -1 : 1;
+  pond.position.set(side * (12 + Math.random()*2), 0, z);
+  pond.rotation.y = Math.random() * Math.PI;
+  pond.visible = true;
+  activeDecorations.push({ obj: pond });
+}
+
+
+// ─── OBSTACLES ────────────────────────────────────────────────────
+const obstaclePool = [];
+const activeObstacles = [];
+
+// FEMALE JOGGER (replaces bench)
+function makeFemaleJogger() {
+  const g = new THREE.Group();
+  // Torso
+  const torso = box(0.5, 0.62, 0.36, MAT.fjShirt); torso.position.y = 1.18; g.add(torso);
+  // Head
+  const head = box(0.38, 0.38, 0.36, MAT.fjSkin); head.position.y = 1.72; g.add(head);
+  // Ponytail
+  const hair = box(0.36, 0.2, 0.36, MAT.fjHair); hair.position.y = 1.9; g.add(hair);
+  const tail = box(0.1, 0.35, 0.1, MAT.fjHair); tail.position.set(0, 1.82, -0.22); tail.rotation.x = 0.4; g.add(tail);
+  // Shorts
+  const shorts = box(0.5, 0.3, 0.36, MAT.fjShorts); shorts.position.y = 0.78; g.add(shorts);
+  // Legs
+  const legL = box(0.18, 0.5, 0.18, MAT.fjSkin); legL.position.set(-0.15, 0.3, 0); g.add(legL);
+  const legR = box(0.18, 0.5, 0.18, MAT.fjSkin); legR.position.set(0.15, 0.3, 0); g.add(legR);
+  // Shoes
+  const shL = box(0.18, 0.12, 0.28, MAT.fjShoe); shL.position.set(-0.15, 0.06, 0.05); g.add(shL);
+  const shR = box(0.18, 0.12, 0.28, MAT.fjShoe); shR.position.set(0.15, 0.06, 0.05); g.add(shR);
+  // Arms
+  const aL = box(0.14, 0.48, 0.14, MAT.fjSkin); aL.position.set(-0.36, 1.1, 0); g.add(aL);
+  const aR = box(0.14, 0.48, 0.14, MAT.fjSkin); aR.position.set(0.36, 1.1, 0); g.add(aR);
+
+  g._legL = legL; g._legR = legR; g._shL = shL; g._shR = shR; g._aL = aL; g._aR = aR;
+  g._animT = 0;
+  g.userData = { type: 'femaleJogger', hitW: 0.7, hitH: 2.0, hurdleH: 2.1 };
+  return g;
+}
+
+// OBSTACLE OTTER (replaces root — sits/waddles on path)
+function makeObstacleOtter() {
+  const g = new THREE.Group();
+  // Body — low to ground
+  const body = box(0.72, 0.32, 1.0, MAT.otter); body.position.y = 0.28; g.add(body);
+  // Belly
+  const belly = box(0.5, 0.22, 0.7, MAT.otterBelly); belly.position.set(0, 0.28, 0.1); g.add(belly);
+  // Head
+  const head = sph(0.26, MAT.otterB); head.position.set(0, 0.62, 0.42); g.add(head);
+  const nose = sph(0.07, new THREE.MeshLambertMaterial({color:0x221100}));
+  nose.position.set(0, 0.61, 0.67); g.add(nose);
+  // Eyes
+  for (let ex of [-0.1, 0.1]) {
+    const eye = sph(0.04, new THREE.MeshLambertMaterial({color:0x000000}));
+    eye.position.set(ex, 0.68, 0.65); g.add(eye);
+  }
+  // Ears
+  for (let ex of [-0.18, 0.18]) {
+    const ear = sph(0.07, MAT.otterB); ear.position.set(ex, 0.85, 0.32); g.add(ear);
+  }
+  // Tail
+  const tail = box(0.16, 0.14, 0.45, MAT.otter); tail.position.set(0, 0.25, -0.55); tail.rotation.x = -0.3; g.add(tail);
+  // Legs
+  for (let lx of [-0.28, 0.28]) {
+    for (let lz of [-0.3, 0.3]) {
+      const leg = box(0.14, 0.12, 0.22, MAT.otterB); leg.position.set(lx, 0.06, lz); g.add(leg);
+    }
+  }
+  g.userData = { type: 'obsOtter', hitW: 0.85, hitH: 0.65, hurdleH: 0.65 };
+  return g;
+}
+
+function makeBin() {
+  const g = new THREE.Group();
+  const body = cyl(0.28, 0.22, 0.9, 8, MAT.bin); body.position.y = 0.55; g.add(body);
+  const lid = cyl(0.3, 0.3, 0.08, 8, MAT.metal); lid.position.y = 1.02; g.add(lid);
+  g.userData = { type: 'bin', hitW: 0.6, hitH: 1.1, hurdleH: 1.1 };
+  return g;
+}
+// CYCLIST (replaces lamppost)
+function makeCyclist() {
+  const g = new THREE.Group();
+
+  // --- Bike frame ---
+  const bikeMat = new THREE.MeshLambertMaterial({ color: 0x2255cc });
+  const frameMat = new THREE.MeshLambertMaterial({ color: 0xdd3311 });
+
+  // Wheels
+  for (let wz of [-0.55, 0.55]) {
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.05, 8, 18), new THREE.MeshLambertMaterial({ color: 0x888888 }));
+    rim.rotation.y = Math.PI / 2;
+    rim.position.set(0, 0.4, wz);
+    rim.castShadow = true;
+    g.add(rim);
+    // Tyre
+    const tyre = new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.07, 6, 18), new THREE.MeshLambertMaterial({ color: 0x111111 }));
+    tyre.rotation.y = Math.PI / 2;
+    tyre.position.set(0, 0.4, wz);
+    g.add(tyre);
+  }
+  // Frame tubes
+  const topTube  = box(0.07, 0.07, 1.05, frameMat); topTube.position.set(0, 0.88, 0); g.add(topTube);
+  const downTube = box(0.07, 0.07, 0.75, frameMat); downTube.rotation.x = 0.6; downTube.position.set(0, 0.6, 0.18); g.add(downTube);
+  const seatTube = box(0.07, 0.5, 0.07, frameMat); seatTube.position.set(0, 0.65, -0.08); g.add(seatTube);
+  // Handlebar stem
+  const stem = box(0.06, 0.35, 0.06, bikeMat); stem.position.set(0, 1.08, 0.5); g.add(stem);
+  const bar  = box(0.06, 0.06, 0.5, bikeMat); bar.position.set(0, 1.25, 0.5); g.add(bar);
+  // Seat
+  const seat = box(0.28, 0.06, 0.18, new THREE.MeshLambertMaterial({ color: 0x111111 }));
+  seat.position.set(0, 1.14, -0.1); g.add(seat);
+
+  // --- Rider ---
+  const rMat = new THREE.MeshLambertMaterial({ color: 0x22aa55 }); // green jersey
+  const rSkin = new THREE.MeshLambertMaterial({ color: 0xf4a460 });
+  const rShort = new THREE.MeshLambertMaterial({ color: 0x222222 });
+  const helmet = new THREE.MeshLambertMaterial({ color: 0xffdd00 });
+
+  // Torso (leaned forward)
+  const torso = box(0.42, 0.55, 0.32, rMat); torso.position.set(0, 1.38, 0.18); torso.rotation.x = -0.55; g.add(torso);
+  // Head
+  const head = box(0.3, 0.3, 0.3, rSkin); head.position.set(0, 1.72, 0.46); g.add(head);
+  // Helmet
+  const helm = box(0.34, 0.18, 0.34, helmet); helm.position.set(0, 1.88, 0.45); g.add(helm);
+  // Arms (reaching to bars)
+  for (let ax of [-0.22, 0.22]) {
+    const arm = box(0.12, 0.12, 0.5, rSkin); arm.rotation.x = -0.4;
+    arm.position.set(ax, 1.45, 0.38); g.add(arm);
+  }
+  // Legs (pedalling, one up one down)
+  const legU = box(0.14, 0.42, 0.14, rShort); legU.position.set(-0.14, 1.08, -0.05); legU.rotation.x = -0.5; g.add(legU);
+  const legD = box(0.14, 0.42, 0.14, rShort); legD.position.set(0.14, 0.82, 0.15); legD.rotation.x = 0.4; g.add(legD);
+
+  g._legU = legU; g._legD = legD; g._animT = 0;
+  g.userData = { type: 'cyclist', hitW: 0.9, hitH: 1.95, hurdleH: 2.1 };
+  return g;
+}
+
+// Pre-warm pool with multiple of each obstacle type so they're always available
+(function() {
+  const types = [makeFemaleJogger, makeFemaleJogger, makeFemaleJogger,
+                 makeBin, makeBin,
+                 makeObstacleOtter, makeObstacleOtter,
+                 makeCyclist, makeCyclist];
+  for (const fn of types) {
+    const o = fn();
+    o.visible = false;
+    scene.add(o);
+    obstaclePool.push(o);
+  }
+})();
+
+function getObstacle() {
+  // Pick a type first, then find a free slot of that type — guarantees fair distribution
+  const rand = Math.random();
+  let targetType;
+  if (rand < 0.45)      targetType = 'femaleJogger';
+  else if (rand < 0.65) targetType = 'bin';
+  else if (rand < 0.82) targetType = 'obsOtter';
+  else                  targetType = 'cyclist';
+
+  let o = obstaclePool.find(o => !o.visible && o.userData.type === targetType);
+  if (!o) {
+    // Create a new one of the correct type
+    if      (targetType === 'femaleJogger') o = makeFemaleJogger();
+    else if (targetType === 'bin')          o = makeBin();
+    else if (targetType === 'obsOtter')     o = makeObstacleOtter();
+    else                                    o = makeCyclist();
+    scene.add(o);
+    obstaclePool.push(o);
+  }
+  return o;
+}
+
+// ─── CRITTERS ─────────────────────────────────────────────────────
+const critterPool = [];
+const activeCritters = [];
+
+function makeOtter() {
+  const g = new THREE.Group();
+  const body = box(0.5, 0.35, 0.8, MAT.otter); body.position.y = 0.35; g.add(body);
+  const head = sph(0.22, MAT.otterB); head.position.set(0, 0.65, 0.28); g.add(head);
+  const nose = sph(0.06, MAT.otterB); nose.position.set(0, 0.64, 0.49); g.add(nose);
+  for (let e of [-1,1]) { const ear = sph(0.06, MAT.otterB); ear.position.set(e*0.15, 0.83, 0.22); g.add(ear); }
+  const tail = box(0.14, 0.14, 0.4, MAT.otter); tail.position.set(0, 0.3, -0.5); tail.rotation.x = 0.3; g.add(tail);
+  g.userData = { critterType: 'otter', hitW: 0.6, hitH: 0.7 };
+  return g;
+}
+function makeCrow() {
+  const g = new THREE.Group();
+  const body = box(0.3, 0.28, 0.45, MAT.crow); body.position.y = 0.22; g.add(body);
+  const head = sph(0.13, MAT.crow); head.position.set(0, 0.44, 0.17); g.add(head);
+  const beak = box(0.05, 0.05, 0.15, new THREE.MeshLambertMaterial({color:0xffaa00}));
+  beak.position.set(0, 0.43, 0.31); g.add(beak);
+  for (let e of [-1,1]) {
+    const wing = box(0.4, 0.06, 0.35, MAT.crow);
+    wing.position.set(e * 0.35, 0.25, 0); wing.rotation.z = e * 0.2; g.add(wing);
+  }
+  g.userData = { critterType: 'crow', hitW: 0.4, hitH: 0.5 };
+  return g;
+}
+
+function getCritter(type) {
+  let c = critterPool.find(c => !c.visible && c.userData.critterType === type);
+  if (!c) {
+    c = type === 'otter' ? makeOtter() : makeCrow();
+    scene.add(c);
+    critterPool.push(c);
+  }
+  return c;
+}
+
+// ─── PLAYER ───────────────────────────────────────────────────────
+const player = new THREE.Group();
+scene.add(player);
+
+// Body
+const torso = box(0.62, 0.7, 0.42, MAT.shirt); torso.position.y = 1.25; player.add(torso);
+const head = box(0.46, 0.46, 0.42, MAT.skin); head.position.y = 1.9; player.add(head);
+// Cap
+const cap = box(0.52, 0.12, 0.52, new THREE.MeshLambertMaterial({color:0xff4444}));
+cap.position.y = 2.16; player.add(cap);
+const brim = box(0.68, 0.06, 0.28, new THREE.MeshLambertMaterial({color:0xff4444}));
+brim.position.set(0, 2.1, 0.28); player.add(brim);
+// Shorts
+const shorts = box(0.62, 0.36, 0.42, MAT.shorts); shorts.position.y = 0.8; player.add(shorts);
+// Legs
+const legL = box(0.22, 0.55, 0.22, MAT.skin); legL.position.set(-0.18, 0.34, 0); player.add(legL);
+const legR = box(0.22, 0.55, 0.22, MAT.skin); legR.position.set(0.18, 0.34, 0); player.add(legR);
+// Shoes
+const shoeL = box(0.22, 0.14, 0.32, MAT.shoe); shoeL.position.set(-0.18, 0.07, 0.05); player.add(shoeL);
+const shoeR = box(0.22, 0.14, 0.32, MAT.shoe); shoeR.position.set(0.18, 0.07, 0.05); player.add(shoeR);
+// Arms
+const armL = box(0.18, 0.55, 0.18, MAT.skin); armL.position.set(-0.43, 1.16, 0); player.add(armL);
+const armR = box(0.18, 0.55, 0.18, MAT.skin); armR.position.set(0.43, 1.16, 0); player.add(armR);
+
+player.position.set(0, 0, 3);
+
+// ─── PARTICLES ────────────────────────────────────────────────────
+const PART_COUNT = 200;
+const partPositions = new Float32Array(PART_COUNT * 3);
+const partColors = new Float32Array(PART_COUNT * 3);
+const partGeo = new THREE.BufferGeometry();
+partGeo.setAttribute('position', new THREE.BufferAttribute(partPositions, 3));
+partGeo.setAttribute('color', new THREE.BufferAttribute(partColors, 3));
+const partMat = new THREE.PointsMaterial({ size: 0.18, vertexColors: true, transparent: true, opacity: 0.9 });
+const particles = new THREE.Points(partGeo, partMat);
+scene.add(particles);
+const partData = Array.from({length: PART_COUNT}, () => ({ active: false, vx:0, vy:0, vz:0, life:0, maxLife:1 }));
+
+function emitParticles(x, y, z, n, colors) {
+  let spawned = 0;
+  for (let i = 0; i < PART_COUNT && spawned < n; i++) {
+    if (!partData[i].active) {
+      partData[i].active = true;
+      partData[i].life = 0;
+      partData[i].maxLife = 0.5 + Math.random() * 0.5;
+      partData[i].vx = (Math.random() - 0.5) * 4;
+      partData[i].vy = 1.5 + Math.random() * 3;
+      partData[i].vz = (Math.random() - 0.5) * 4;
+      partPositions[i*3] = x; partPositions[i*3+1] = y; partPositions[i*3+2] = z;
+      const c = colors[Math.floor(Math.random() * colors.length)];
+      partColors[i*3] = c[0]; partColors[i*3+1] = c[1]; partColors[i*3+2] = c[2];
+      spawned++;
+    }
+  }
+  partGeo.attributes.position.needsUpdate = true;
+  partGeo.attributes.color.needsUpdate = true;
+}
+
+function updateParticles(dt) {
+  for (let i = 0; i < PART_COUNT; i++) {
+    if (!partData[i].active) continue;
+    partData[i].life += dt;
+    if (partData[i].life >= partData[i].maxLife) { partData[i].active = false; partPositions[i*3+1] = -999; continue; }
+    const t = partData[i].life / partData[i].maxLife;
+    partPositions[i*3]   += partData[i].vx * dt;
+    partPositions[i*3+1] += (partData[i].vy - 8 * partData[i].life) * dt;
+    partPositions[i*3+2] += partData[i].vz * dt;
+    partColors[i*3+3] = 1 - t;
+  }
+  partGeo.attributes.position.needsUpdate = true;
+}
+
+// ─── CLOUD LAYER ──────────────────────────────────────────────────
+const cloudsGroup = new THREE.Group();
+scene.add(cloudsGroup);
+for (let i = 0; i < 12; i++) {
+  const cg = new THREE.Group();
+  for (let j = 0; j < 4; j++) {
+    const c = sph(2 + Math.random() * 1.5, new THREE.MeshLambertMaterial({color:0xffffff, transparent:true, opacity:0.85}));
+    c.position.set(j * 2.5 + Math.random() - 1, Math.random() * 1.5, 0);
+    cg.add(c);
+  }
+  cg.position.set((Math.random() - 0.5) * 100, 25 + Math.random() * 10, -Math.random() * 120 - 10);
+  cloudsGroup.add(cg);
+}
+
+// ─── SKYLINE HINTS ────────────────────────────────────────────────
+// Distant HDB-style blocks
+for (let i = 0; i < 8; i++) {
+  const h = 15 + Math.random() * 20;
+  const b = box(4 + Math.random() * 3, h, 3, new THREE.MeshLambertMaterial({color:0xd4c8b8, transparent:true, opacity:0.6}));
+  b.position.set(-50 + i * 14 + Math.random() * 6, h / 2, -90);
+  scene.add(b);
+}
+
+// ─── COINS ────────────────────────────────────────────────────────
+const coinPool = [];
+const activeCoins = [];
+let nextCoinIn = 1.2;
+
+function makeCoin() {
+  const g = new THREE.Group();
+  // Main disc
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.1, 16), MAT.coin);
+  disc.rotation.x = Math.PI / 2; // face the player
+  disc.castShadow = true;
+  g.add(disc);
+  // Edge ring
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.04, 6, 16), MAT.coinEdge);
+  g.add(ring);
+  // Dollar sign emboss (tiny box)
+  const emboss = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.18, 0.04),
+    new THREE.MeshStandardMaterial({ color: 0xcc8800, metalness: 0.8, roughness: 0.2 }));
+  emboss.position.z = 0.07;
+  g.add(emboss);
+
+  g.visible = false;
+  scene.add(g);
+  coinPool.push(g);
+  return g;
+}
+
+for (let i = 0; i < 60; i++) makeCoin();
+
+// Spawn coins in a line or arc pattern
+function spawnCoins() {
+  const pattern = Math.floor(Math.random() * 4);
+  const lane = LANES[Math.floor(Math.random() * 3)];
+  const baseZ = player.position.z - 85;
+  const coinH = 0.65 + Math.random() * 0.3;
+
+  if (pattern === 0) {
+    // Straight line in one lane
+    for (let i = 0; i < 5; i++) {
+      const c = coinPool.find(c => !c.visible);
+      if (!c) continue;
+      c.position.set(lane, coinH, baseZ - i * 1.8);
+      c.visible = true;
+      c._animT = Math.random() * Math.PI * 2;
+      activeCoins.push(c);
+    }
+  } else if (pattern === 1) {
+    // Arc across all 3 lanes
+    for (let i = 0; i < 3; i++) {
+      const c = coinPool.find(c => !c.visible);
+      if (!c) continue;
+      c.position.set(LANES[i], coinH, baseZ - i * 2.2);
+      c.visible = true;
+      c._animT = i * 0.8;
+      activeCoins.push(c);
+    }
+  } else if (pattern === 2) {
+    // Floating arc (jump to collect)
+    for (let i = 0; i < 5; i++) {
+      const c = coinPool.find(c => !c.visible);
+      if (!c) continue;
+      const arcY = 0.4 + Math.sin((i / 4) * Math.PI) * 2.2;
+      c.position.set(lane, arcY, baseZ - i * 1.6);
+      c.visible = true;
+      c._animT = i * 0.5;
+      activeCoins.push(c);
+    }
+  } else {
+    // Two parallel lanes
+    const lanes = [LANES[0], LANES[2]];
+    for (let li = 0; li < 2; li++) {
+      for (let i = 0; i < 3; i++) {
+        const c = coinPool.find(c => !c.visible);
+        if (!c) continue;
+        c.position.set(lanes[li], coinH, baseZ - i * 2.4 - li * 1.2);
+        c.visible = true;
+        c._animT = Math.random() * Math.PI;
+        activeCoins.push(c);
+      }
+    }
+  }
+
+  nextCoinIn = 1.8 + Math.random() * 2.5;
+}
+
+function updateCoins(dt, move) {
+  nextCoinIn -= dt;
+  if (nextCoinIn <= 0) spawnCoins();
+
+  for (let i = activeCoins.length - 1; i >= 0; i--) {
+    const c = activeCoins[i];
+    c._animT += dt * 3.5;
+    c.position.z += move;
+    c.rotation.y += dt * 3; // spin
+    // Gentle float bob
+    c.position.y += Math.sin(c._animT) * 0.008;
+
+    // Collect check
+    const dx = Math.abs(player.position.x - c.position.x);
+    const dy = Math.abs((playerY + 0.9) - c.position.y);
+    const dz = Math.abs(player.position.z - c.position.z);
+    if (dx < 0.55 && dy < 0.7 && dz < 0.7) {
+      collectCoin(c, i);
+      continue;
+    }
+
+    // Remove if past camera
+    if (c.position.z > camera.position.z + 8) {
+      c.visible = false;
+      activeCoins.splice(i, 1);
+    }
+  }
+}
+
+function collectCoin(c, idx) {
+  coinsCollected++;
+  score += 10;
+  document.getElementById('coin-count').textContent = coinsCollected;
+  document.getElementById('score').textContent = score;
+  // Sparkle burst
+  emitParticles(c.position.x, c.position.y, c.position.z, 8,
+    [[1,0.85,0.1],[1,0.6,0],[1,1,0.4]]);
+  playCoinSound();
+  c.visible = false;
+  activeCoins.splice(idx, 1);
+}
+
+// ─── RETRO MUSIC ENGINE (Web Audio API) ───────────────────────────
+let audioCtx = null;
+let musicNodes = [];
+let musicPlaying = false;
+let musicScheduleTimer = null;
+let nextNoteTime = 0;
+let beatStep = 0;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// Retro chiptune: upbeat 8-bit style melody + bassline + drums
+const MELODY = [
+  // Bar 1 – main hook
+  {n:'E5',d:0.25},{n:'E5',d:0.25},{n:'r',d:0.25},{n:'E5',d:0.25},
+  {n:'r',d:0.25},{n:'C5',d:0.25},{n:'E5',d:0.5},
+  {n:'G5',d:0.5},{n:'r',d:0.5},{n:'G4',d:0.5},{n:'r',d:0.5},
+  // Bar 2
+  {n:'C5',d:0.375},{n:'r',d:0.125},{n:'G4',d:0.25},{n:'r',d:0.25},{n:'E4',d:0.375},{n:'r',d:0.125},
+  {n:'A4',d:0.25},{n:'B4',d:0.25},{n:'Bb4',d:0.125},{n:'A4',d:0.25},
+  {n:'G4',d:0.167},{n:'E5',d:0.167},{n:'G5',d:0.167},{n:'A5',d:0.25},
+  {n:'F5',d:0.25},{n:'G5',d:0.25},{n:'r',d:0.25},{n:'E5',d:0.25},
+  {n:'C5',d:0.25},{n:'D5',d:0.25},{n:'B4',d:0.375},{n:'r',d:0.125},
+];
+
+const BASS = [
+  {n:'C3',d:0.5},{n:'C3',d:0.5},{n:'G3',d:0.5},{n:'G3',d:0.5},
+  {n:'A3',d:0.5},{n:'A3',d:0.5},{n:'F3',d:0.5},{n:'F3',d:0.5},
+  {n:'C3',d:0.5},{n:'G3',d:0.5},{n:'A3',d:0.5},{n:'F3',d:0.25},{n:'G3',d:0.25},
+  {n:'C3',d:0.5},{n:'E3',d:0.5},{n:'F3',d:0.5},{n:'G3',d:0.5},
+];
+
+const NOTE_FREQ = {
+  'C3':130.81,'D3':146.83,'E3':164.81,'F3':174.61,'G3':196.00,'A3':220.00,'Bb3':233.08,'B3':246.94,
+  'C4':261.63,'D4':293.66,'E4':329.63,'F4':349.23,'G4':392.00,'A4':440.00,'Bb4':466.16,'B4':493.88,
+  'C5':523.25,'D5':587.33,'E5':659.25,'F5':698.46,'G5':783.99,'A5':880.00,'Bb5':932.33,'B5':987.77,
+  'r': 0
+};
+
+const BPM = 88;
+const BEAT = 60 / BPM;
+let melodyIdx = 0, bassIdx = 0, drumStep = 0;
+
+// Drum pattern (16 steps): kick=K, snare=S, hihat=H
+const DRUM_PAT = ['K','H','S','H', 'K','H','S','H', 'K','H','S','H', 'K','H','S','H'];
+
+function playTone(freq, type, startTime, duration, gain=0.18, detune=0) {
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gainNode = ctx.createGain();
+  const masterGain = ctx.createGain();
+
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, startTime);
+  if (detune) osc.detune.setValueAtTime(detune, startTime);
+
+  gainNode.gain.setValueAtTime(gain, startTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+  masterGain.gain.setValueAtTime(0.55, startTime);
+
+  osc.connect(gainNode);
+  gainNode.connect(masterGain);
+  masterGain.connect(ctx.destination);
+
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.01);
+  musicNodes.push(osc);
+}
+
+function playDrum(type, time) {
+  const ctx = getAudioCtx();
+  const buf = ctx.createBuffer(1, ctx.sampleRate * 0.1, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  const gainNode = ctx.createGain();
+  const src = ctx.createBufferSource();
+
+  if (type === 'K') {
+    // Kick: sine sweep down
+    for (let i = 0; i < data.length; i++) {
+      const t = i / ctx.sampleRate;
+      data[i] = Math.sin(2 * Math.PI * (80 - 60 * t) * t) * Math.exp(-t * 20);
+    }
+    gainNode.gain.setValueAtTime(0.7, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.15);
+  } else if (type === 'S') {
+    // Snare: noise + tone
+    for (let i = 0; i < data.length; i++) {
+      const t = i / ctx.sampleRate;
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-t * 30) * 0.7 +
+                Math.sin(2 * Math.PI * 200 * t) * Math.exp(-t * 40) * 0.4;
+    }
+    gainNode.gain.setValueAtTime(0.45, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
+  } else {
+    // Hihat: short noise burst
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / data.length * 20);
+    }
+    gainNode.gain.setValueAtTime(0.12, time);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.04);
+  }
+
+  src.buffer = buf;
+  src.connect(gainNode);
+  gainNode.connect(ctx.destination);
+  src.start(time);
+  musicNodes.push(src);
+}
+
+function playCoinSound() {
+  const ctx = getAudioCtx();
+  const t = ctx.currentTime;
+  playTone(1047, 'square', t,      0.06, 0.22);
+  playTone(1319, 'square', t+0.06, 0.06, 0.22);
+  playTone(1568, 'square', t+0.12, 0.10, 0.22);
+}
+
+function scheduleMusic() {
+  if (!musicPlaying || !audioCtx) return;
+  const ctx = audioCtx;
+  const lookahead = 0.12; // seconds ahead to schedule
+  const scheduleWindow = 0.08;
+
+  while (nextNoteTime < ctx.currentTime + lookahead) {
+    const stepDur = BEAT / 4; // 16th note grid
+    const halfBeat = BEAT / 2;
+
+    // Melody note
+    const mel = MELODY[melodyIdx % MELODY.length];
+    if (mel.n !== 'r') {
+      const freq = NOTE_FREQ[mel.n] || 0;
+      if (freq > 0) {
+        // Square wave melody with slight chorus via detune
+        playTone(freq, 'square', nextNoteTime, mel.d * BEAT * 0.85, 0.14);
+        playTone(freq, 'square', nextNoteTime, mel.d * BEAT * 0.85, 0.07, 8);
+      }
+    }
+
+    // Bass note (changes every half-bar = 2 beats)
+    if (beatStep % 4 === 0) {
+      const bas = BASS[bassIdx % BASS.length];
+      if (bas.n !== 'r') {
+        const freq = NOTE_FREQ[bas.n] || 0;
+        if (freq > 0) playTone(freq, 'sawtooth', nextNoteTime, bas.d * BEAT * 0.9, 0.12);
+      }
+      bassIdx++;
+    }
+
+    // Drums on 16th-note grid
+    const drumType = DRUM_PAT[drumStep % 16];
+    playDrum(drumType, nextNoteTime);
+
+    // Advance
+    nextNoteTime += mel.d * BEAT;
+    melodyIdx++;
+    beatStep++;
+    drumStep++;
+  }
+
+  musicScheduleTimer = setTimeout(scheduleMusic, scheduleWindow * 1000);
+}
+
+function startMusic() {
+  if (musicPlaying) return;
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') ctx.resume();
+  musicPlaying = true;
+  nextNoteTime = ctx.currentTime + 0.1;
+  melodyIdx = 0; bassIdx = 0; beatStep = 0; drumStep = 0;
+  scheduleMusic();
+}
+
+function stopMusic() {
+  musicPlaying = false;
+  clearTimeout(musicScheduleTimer);
+  musicNodes.forEach(n => { try { n.stop(); } catch(e) {} });
+  musicNodes = [];
+}
+
+// ─── INPUT ────────────────────────────────────────────────────────
+const keys = {};
+window.addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if (!gameRunning) return;
+  // Prevent Space/arrows from triggering buttons or scrolling while playing
+  if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight'].includes(e.code)) {
+    e.preventDefault();
+  }
+  if ((e.code === 'ArrowUp' || e.code === 'Space') && !isJumping) doJump();
+  if ((e.code === 'ArrowDown' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') && !isSliding) doSlide();
+  if (e.code === 'ArrowLeft' && currentLane > 0) { currentLane--; targetLaneX = LANES[currentLane]; }
+  if (e.code === 'ArrowRight' && currentLane < 2) { currentLane++; targetLaneX = LANES[currentLane]; }
+});
+window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+// Touch / tap
+let touchStartX = 0, touchStartY = 0;
+window.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+window.addEventListener('touchend', e => {
+  if (!gameRunning) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy)) {
+    if (dx > 30 && currentLane < 2) { currentLane++; targetLaneX = LANES[currentLane]; }
+    if (dx < -30 && currentLane > 0) { currentLane--; targetLaneX = LANES[currentLane]; }
+  } else {
+    if (dy < -30 && !isJumping) doJump();
+    if (dy > 30 && !isSliding) doSlide();
+  }
+}, { passive: true });
+
+function doJump() {
+  isJumping = true;
+  jumpVelocity = 10;
+  emitParticles(player.position.x, 0.2, player.position.z, 10,
+    [[1,0.9,0.2],[0.2,1,0.4],[1,0.4,0.2]]);
+}
+function doSlide() {
+  isSliding = true;
+  slideTimer = 0.55;
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────
+function showToast(msg, color='#ffffff') {
+  clearTimeout(toastTimeout);
+  toastEl.textContent = msg;
+  toastEl.style.color = color;
+  toastEl.style.opacity = 1;
+  toastTimeout = setTimeout(() => toastEl.style.opacity = 0, 1200);
+}
+
+// ─── SPAWNING ─────────────────────────────────────────────────────
+let nextObstacleIn = 3;
+let nextCritterIn = 5 + Math.random() * 8;
+
+function spawnObstacle() {
+  const obs = getObstacle();
+  obs.visible = true;
+  const lane = LANES[Math.floor(Math.random() * 3)];
+  obs.position.set(lane, 0, player.position.z - 80);
+  obs.rotation.y = 0;
+  const gap = Math.max(1.5, 3.2 - score * 0.002);
+  activeObstacles.push({ obj: obs, z: obs.position.z });
+  nextObstacleIn = gap + Math.random() * 1.5;
+}
+
+function spawnCritter() {
+  const type = Math.random() < 0.55 ? 'otter' : 'crow';
+  const c = getCritter(type);
+  c.visible = true;
+  const side = Math.random() < 0.5 ? -1 : 1;
+  c.position.set(side * 6, type === 'crow' ? 0.4 : 0, player.position.z - 80);
+  c.userData.moveDir = -side;
+  c.userData.moveSpeed = 2 + Math.random() * 2;
+  c.userData.animT = 0;
+  activeCritters.push(c);
+  nextCritterIn = 5 + Math.random() * 10;
+}
+
+// ─── HIT DETECT ───────────────────────────────────────────────────
+function checkCollisions() {
+  if (invincible) return;
+  for (const o of activeObstacles) {
+    if (!o.obj.visible) continue;
+    const d = o.obj.userData;
+    const dx = Math.abs(player.position.x - o.obj.position.x);
+    const dz = Math.abs(player.position.z - o.obj.position.z);
+    if (dx < (d.hitW / 2 + 0.28) && dz < 1.0) {
+      if (playerY > d.hurdleH + 0.1) continue;
+      if (d.type === 'obsOtter' && playerY > 0.55) continue;
+      hitPlayer();
+      return;
+    }
+  }
+  for (const c of activeCritters) {
+    if (!c.visible) continue;
+    const dx = Math.abs(player.position.x - c.position.x);
+    const dz = Math.abs(player.position.z - c.position.z);
+    if (dx < 0.7 && dz < 0.9 && playerY < 0.6) {
+      showToast(c.userData.critterType === 'otter' ? '🦦 Otter crash!' : '🐦 Crow attack!', '#ff6644');
+      emitParticles(c.position.x, 0.5, c.position.z, 12, [[1,0.3,0.1],[1,0.8,0.1],[1,1,1]]);
+      c.visible = false; // critter scared off
+      hitPlayer();
+      return;
+    }
+  }
+}
+
+function hitPlayer() {
+  lives--;
+  invincible = true;
+  emitParticles(player.position.x, 1, player.position.z, 20,
+    [[1,0.2,0.2],[1,0.8,0.2],[1,1,1]]);
+  setTimeout(() => invincible = false, 1800);
+  if (lives <= 0) { endGame(); return; }
+  updateLivesUI();
+  showToast(lives === 2 ? 'Aiyah! 😵' : lives === 1 ? 'Careful uncle! ⚠️' : 'Jialat! 💀', '#ff4444');
+}
+
+function updateLivesUI() {
+  document.getElementById('lives').textContent = '❤️'.repeat(lives) + '🖤'.repeat(3 - lives);
+}
+
+// ─── GAME CONTROL ─────────────────────────────────────────────────
+function startGame() {
+  document.getElementById('overlay').classList.add('hidden');
+  document.getElementById('gameover-score').style.display = 'none';
+  gameRunning = true; gameOver = false;
+  score = 0; coinsCollected = 0;
+  lives = 3; speed = baseSpeed;
+  currentLane = 1; targetLaneX = LANES[1]; laneX = LANES[1];
+  playerY = 0; jumpVelocity = 0; isJumping = false;
+  isSliding = false; slideTimer = 0;
+  player.position.set(LANES[1], 0, 3);
+  invincible = false;
+  activeObstacles.forEach(o => { o.obj.visible = false; });
+  activeObstacles.length = 0;
+  activeCritters.forEach(c => { c.visible = false; });
+  activeCritters.length = 0;
+  activeDecorations.forEach(d => { d.obj.visible = false; });
+  activeDecorations.length = 0;
+  activeCoins.forEach(c => { c.visible = false; });
+  activeCoins.length = 0;
+  nextObstacleIn = 3; nextCritterIn = 6; pondCounter = 0; nextCoinIn = 1.5;
+  lastPondZ = player.position.z;
+  updateLivesUI();
+  document.getElementById('score').textContent = '0';
+  document.getElementById('coin-count').textContent = '0';
+  clock.getDelta();
+  startMusic();
+}
+
+function endGame() {
+  gameRunning = false; gameOver = true;
+  stopMusic();
+  if (score > best) {
+    best = score;
+    localStorage.setItem('bishanBest', best);
+    document.getElementById('best').textContent = best;
+    showToast('🏆 NEW RECORD! ' + best + ' pts', '#ffdc50');
+  }
+  setTimeout(() => {
+    const ov = document.getElementById('overlay');
+    document.getElementById('gameover-score').style.display = 'block';
+    document.getElementById('gameover-score').textContent =
+      `Score: ${score} pts · 🪙 ${coinsCollected} coins · Best: ${best}`;
+    document.getElementById('start-btn').textContent = 'RUN AGAIN!';
+    ov.classList.remove('hidden');
+  }, 800);
+}
+
+// ─── ANIMATION LOOP ───────────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  frameCount++;
+
+  if (!gameRunning) { renderer.render(scene, camera); return; }
+
+  // Speed ramp based on coins collected (progressive difficulty)
+  speed = Math.min(maxSpeed, baseSpeed + coinsCollected * 0.18);
+  document.getElementById('speed-bar').style.width =
+    Math.round(((speed - baseSpeed) / (maxSpeed - baseSpeed)) * 100) + '%';
+
+  const move = speed * dt;
+  // Score is coins-only — updated in collectCoin(), not here
+
+  // ── Lane lerp ──
+  laneX += (targetLaneX - laneX) * Math.min(1, dt * 14);
+  player.position.x = laneX;
+
+  // ── Jump physics ──
+  if (isJumping) {
+    jumpVelocity -= 22 * dt;
+    playerY += jumpVelocity * dt;
+    if (playerY <= 0) { playerY = 0; jumpVelocity = 0; isJumping = false; }
+  }
+
+  // ── Slide ──
+  if (isSliding) {
+    slideTimer -= dt;
+    if (slideTimer <= 0) { isSliding = false; }
+  }
+
+  // ── Player height ──
+  player.position.y = playerY;
+
+  // ── Player run anim ──
+  const t = performance.now() * 0.006 * (speed / baseSpeed);
+  const legSwing = Math.sin(t) * (isSliding ? 0.05 : 0.5);
+  legL.rotation.x = legSwing;
+  legR.rotation.x = -legSwing;
+  shoeL.position.z = 0.05 + Math.sin(t) * 0.12;
+  shoeR.position.z = 0.05 - Math.sin(t) * 0.12;
+  armL.rotation.x = -legSwing * 0.7;
+  armR.rotation.x = legSwing * 0.7;
+  // Bob
+  const bob = isJumping ? 0 : Math.abs(Math.sin(t)) * 0.06;
+  torso.position.y = 1.25 + bob;
+  head.position.y = 1.9 + bob;
+
+  // Slide squash
+  if (isSliding) {
+    player.scale.y = 0.55;
+    player.position.y = playerY - 0.6;
+  } else {
+    player.scale.y += (1 - player.scale.y) * 0.18;
+  }
+
+  // Invincible flicker
+  player.visible = invincible ? Math.sin(performance.now() * 0.02) > 0 : true;
+
+  // ── Scroll world — segments carry baked scenery, recycle automatically ──
+  segments.forEach(seg => {
+    seg.grp.position.z += move;
+    if (seg.grp.position.z > camera.position.z + SEGMENT_LEN * 1.5) {
+      seg.grp.position.z -= NUM_SEGS * SEGMENT_LEN;
+    }
+  });
+
+  // Ponds — occasional, pooled
+  if (player.position.z - lastPondZ > 80) {
+    spawnPond(player.position.z - 90);
+    lastPondZ = player.position.z;
+  }
+  for (let i = activeDecorations.length - 1; i >= 0; i--) {
+    const d = activeDecorations[i];
+    d.obj.position.z += move;
+    if (d.obj.position.z > player.position.z + 20) {
+      d.obj.visible = false;
+      activeDecorations.splice(i, 1);
+    }
+  }
+
+  // Obstacles
+  nextObstacleIn -= dt;
+  if (nextObstacleIn <= 0) spawnObstacle();
+  for (let i = activeObstacles.length - 1; i >= 0; i--) {
+    const o = activeObstacles[i];
+    o.obj.position.z += move;
+    // Animate female jogger
+    if (o.obj.userData.type === 'femaleJogger') {
+      o.obj._animT = (o.obj._animT || 0) + dt * 7;
+      const sw = Math.sin(o.obj._animT) * 0.45;
+      if (o.obj._legL) { o.obj._legL.rotation.x = sw; o.obj._legR.rotation.x = -sw; }
+      if (o.obj._aL)   { o.obj._aL.rotation.x = -sw * 0.6; o.obj._aR.rotation.x = sw * 0.6; }
+      if (o.obj._shL)  { o.obj._shL.position.z = 0.05 + Math.sin(o.obj._animT) * 0.1; o.obj._shR.position.z = 0.05 - Math.sin(o.obj._animT) * 0.1; }
+    }
+    // Animate cyclist legs pedalling
+    if (o.obj.userData.type === 'cyclist') {
+      o.obj._animT = (o.obj._animT || 0) + dt * 9;
+      const p = Math.sin(o.obj._animT);
+      if (o.obj._legU) { o.obj._legU.rotation.x = -0.5 + p * 0.6; }
+      if (o.obj._legD) { o.obj._legD.rotation.x =  0.4 - p * 0.6; }
+    }
+    // Wobble obstacle otter
+    if (o.obj.userData.type === 'obsOtter') {
+      o.obj._animT = (o.obj._animT || 0) + dt * 3;
+      o.obj.rotation.y = Math.sin(o.obj._animT) * 0.15;
+    }
+    if (o.obj.position.z > player.position.z + 14) {
+      o.obj.visible = false;
+      activeObstacles.splice(i, 1);
+    }
+  }
+
+  // Critters
+  nextCritterIn -= dt;
+  if (nextCritterIn <= 0) spawnCritter();
+  for (let i = activeCritters.length - 1; i >= 0; i--) {
+    const c = activeCritters[i];
+    c.userData.animT += dt;
+    c.position.z += move;
+    c.position.x += c.userData.moveDir * c.userData.moveSpeed * dt;
+    // Crow hop
+    if (c.userData.critterType === 'crow') {
+      c.position.y = 0.4 + Math.abs(Math.sin(c.userData.animT * 8)) * 0.08;
+      c.children.forEach((ch, j) => { if (j > 2) ch.rotation.z = (j === 3 ? 1 : -1) * (0.2 + Math.sin(c.userData.animT * 16) * 0.3); });
+    }
+    // Otter waddle
+    if (c.userData.critterType === 'otter') {
+      c.rotation.z = Math.sin(c.userData.animT * 5) * 0.1;
+    }
+    c.lookAt(c.position.x + c.userData.moveDir, c.position.y, c.position.z + 0.01);
+    if (c.position.z > player.position.z + 14 || Math.abs(c.position.x) > 15) {
+      c.visible = false;
+      activeCritters.splice(i, 1);
+    }
+  }
+
+  // Coins
+  updateCoins(dt, move);
+
+  // Collision
+  checkCollisions();
+
+  // Particles
+  updateParticles(dt);
+
+  // Milestone effects
+  if (score > 0 && score % 200 === 0 && frameCount % 3 === 0) {
+    emitParticles(player.position.x, 2, player.position.z - 5, 16,
+      [[1,0.86,0.2],[0.2,1,0.5],[1,0.3,0.2],[0.2,0.6,1]]);
+    if (score % 1000 === 0) showToast('💪 ' + score + ' pts! Shiok!', '#44ff88');
+  }
+
+  // Clouds drift
+  cloudsGroup.children.forEach(c => {
+    c.position.x += dt * 0.8;
+    if (c.position.x > 70) c.position.x = -70;
+  });
+
+  // Camera follow
+  camera.position.x += (player.position.x * 0.15 - camera.position.x) * 0.06;
+
+  renderer.render(scene, camera);
+}
+
+animate();
+</script>
+</body>
+</html>
