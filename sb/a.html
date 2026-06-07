@@ -140,7 +140,7 @@
     <span class="bad">❌ Pedestrian / Cyclist → -1 life</span><br>
     <span class="bad">❌ HDB Window → -1 life</span><br>
     🖱️ Right-click anywhere to shoot (desktop)<br>
-    👆 Drag to move crosshair · Tap to shoot (mobile)<br>
+    👆 Drag to look around · Tap to shoot (mobile)<br>
     🌊 Difficulty rises every wave!
   </div>
   <button id="startBtn" onclick="startGame()">Play Lah! 🎮</button>
@@ -671,27 +671,8 @@ let camYaw=0, camPitch=0, camSwayT=0;
 let isDragging=false, lastMouseX=0, lastMouseY=0;
 const isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
-// Mobile crosshair position (normalised device coords, -1..1)
-// Desktop always uses centre (0,0); mobile drag shifts this.
-let chX=0, chY=0; // current NDC position of crosshair
-
-const chEl=document.getElementById('crosshair');
-const CH_HALF=28; // half of 56px crosshair
-
-function setCrosshair(nx,ny){
-  // nx,ny in NDC (-1..1); clamp so crosshair stays on screen
-  chX=Math.max(-0.92,Math.min(0.92,nx));
-  chY=Math.max(-0.92,Math.min(0.92,ny));
-  const sx=(chX*0.5+0.5)*window.innerWidth;
-  const sy=(-chY*0.5+0.5)*window.innerHeight;
-  chEl.style.left=sx+'px';
-  chEl.style.top=sy+'px';
-  chEl.style.transform='translate(-50%,-50%)';
-}
-
-// Initialise crosshair to screen centre
-function resetCrosshair(){ chX=0; chY=0; chEl.style.left='50%'; chEl.style.top='50%'; chEl.style.transform='translate(-50%,-50%)'; }
-resetCrosshair();
+// Crosshair always at screen centre — raycaster uses (0,0) NDC
+const aimPoint=new THREE.Vector2(0,0);
 
 // ── Desktop: left-drag to pan camera, right-click to shoot ──
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
@@ -708,7 +689,7 @@ canvas.addEventListener('mousemove',e=>{
   lastMouseX=e.clientX; lastMouseY=e.clientY;
 });
 
-// ── Mobile: drag moves crosshair, tap shoots ──
+// ── Mobile: drag pans the camera (crosshair stays centre), tap shoots ──
 let touchMoved=false;
 canvas.addEventListener('touchstart',e=>{
   touchMoved=false;
@@ -719,10 +700,9 @@ canvas.addEventListener('touchmove',e=>{
   const dx=e.touches[0].clientX-lastMouseX;
   const dy=e.touches[0].clientY-lastMouseY;
   if(Math.abs(dx)>4||Math.abs(dy)>4) touchMoved=true;
-  // Convert pixel delta to NDC delta and move crosshair
-  const ndx= dx/window.innerWidth *2;
-  const ndy=-dy/window.innerHeight*2;
-  setCrosshair(chX+ndx, chY+ndy);
+  camYaw  -=dx*0.003;
+  camPitch-=dy*0.002;
+  camPitch=Math.max(-0.6,Math.min(0.6,camPitch));
   lastMouseX=e.touches[0].clientX; lastMouseY=e.touches[0].clientY;
 },{passive:true});
 canvas.addEventListener('touchend',e=>{
@@ -737,7 +717,6 @@ function shoot(){
   if(!gameRunning) return;
   doMuzzleFlash(); playGunshot();
 
-  const aimPoint=new THREE.Vector2(chX,chY);
   raycaster.setFromCamera(aimPoint,camera);
   const allMeshes=[];
   birds.forEach(b=>{ if(b.alive&&b.hitable) allMeshes.push(b.mesh,...b.mesh.children); });
@@ -915,7 +894,7 @@ function gameLoop(now){
 function startGame(){
   ensureAudio();
   document.getElementById('overlay').style.display='none';
-  resetCrosshair();
+
   gameRunning=true;
 }
 function endGame(){
@@ -934,7 +913,7 @@ function restartGame(){
   particles.forEach(p=>scene.remove(p)); particles=[];
   updateScoreUI(); updateLivesUI(); updateWaveUI();
   document.getElementById('gameoverOverlay').style.display='none';
-  resetCrosshair();
+
   gameRunning=true;
 }
 
