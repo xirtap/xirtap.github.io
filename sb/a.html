@@ -92,13 +92,6 @@
   #crosshair.shoot-flash .ch-ring-inner { stroke: #ffd32a; }
   #crosshair.shoot-flash .ch-arm-inner  { stroke: #ffd32a; }
   #crosshair.shoot-flash .ch-dot-inner  { fill: #ffd32a; }
-  #gyroBtn {
-    display: none;
-    background: rgba(72,219,251,0.2); border: 1.5px solid #48dbfb;
-    color: #48dbfb; border-radius: 12px; padding: 8px 18px;
-    font-family: 'Nunito', sans-serif; font-size: 14px;
-    cursor: pointer; pointer-events: all; margin-top: -4px;
-  }
 </style>
 </head>
 <body>
@@ -147,11 +140,9 @@
     <span class="bad">❌ Pedestrian / Cyclist → -1 life</span><br>
     <span class="bad">❌ HDB Window → -1 life</span><br>
     🖱️ Right-click anywhere to shoot (desktop)<br>
-    👆 Tap anywhere to shoot (mobile)<br>
-    📱 Drag or tilt phone to aim<br>
+    👆 Drag to move crosshair · Tap to shoot (mobile)<br>
     🌊 Difficulty rises every wave!
   </div>
-  <button id="gyroBtn" onclick="requestGyro()">🔄 Enable Gyroscope</button>
   <button id="startBtn" onclick="startGame()">Play Lah! 🎮</button>
 </div>
 
@@ -291,7 +282,6 @@ window.addEventListener('resize',()=>{
 });
 
 const raycaster=new THREE.Raycaster();
-const screenCenter=new THREE.Vector2(0,0);
 
 // ═════════════════════════════════════════════════════════════════════════════
 // LIGHTING
@@ -675,55 +665,50 @@ function doMuzzleFlash(){
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// CAMERA / GYROSCOPE
+// CAMERA & INPUT
 // ═════════════════════════════════════════════════════════════════════════════
-let camYaw=0,camPitch=0,camSwayT=0;
-let isDragging=false,lastMouseX=0,lastMouseY=0;
-let gyroEnabled=false,gyroBaseAlpha=null,gyroBaseBeta=null;
+let camYaw=0, camPitch=0, camSwayT=0;
+let isDragging=false, lastMouseX=0, lastMouseY=0;
 const isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
-function applyGyro(e){
-  if(!gyroEnabled||!gameRunning) return;
-  const a=e.alpha??0, b=e.beta??0;
-  if(gyroBaseAlpha===null){gyroBaseAlpha=a;gyroBaseBeta=b;}
-  let dAlpha=a-gyroBaseAlpha;
-  if(dAlpha>180)dAlpha-=360; if(dAlpha<-180)dAlpha+=360;
-  camYaw=-dAlpha*(Math.PI/180)*1.0;
-  const dBeta=b-gyroBaseBeta;
-  camPitch=-dBeta*(Math.PI/180)*0.8;
-  camPitch=Math.max(-0.6,Math.min(0.6,camPitch));
+// Mobile crosshair position (normalised device coords, -1..1)
+// Desktop always uses centre (0,0); mobile drag shifts this.
+let chX=0, chY=0; // current NDC position of crosshair
+
+const chEl=document.getElementById('crosshair');
+const CH_HALF=28; // half of 56px crosshair
+
+function setCrosshair(nx,ny){
+  // nx,ny in NDC (-1..1); clamp so crosshair stays on screen
+  chX=Math.max(-0.92,Math.min(0.92,nx));
+  chY=Math.max(-0.92,Math.min(0.92,ny));
+  const sx=(chX*0.5+0.5)*window.innerWidth;
+  const sy=(-chY*0.5+0.5)*window.innerHeight;
+  chEl.style.left=sx+'px';
+  chEl.style.top=sy+'px';
+  chEl.style.transform='translate(-50%,-50%)';
 }
 
-async function requestGyro(){
-  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
-    try{
-      const perm=await DeviceOrientationEvent.requestPermission();
-      if(perm==='granted'){window.addEventListener('deviceorientation',applyGyro);gyroEnabled=true;document.getElementById('gyroBtn').textContent='✅ Gyroscope Active';}
-    }catch(e){console.warn('Gyro denied',e);}
-  } else {window.addEventListener('deviceorientation',applyGyro);gyroEnabled=true;document.getElementById('gyroBtn').textContent='✅ Gyroscope Active';}
-}
+// Initialise crosshair to screen centre
+function resetCrosshair(){ chX=0; chY=0; chEl.style.left='50%'; chEl.style.top='50%'; chEl.style.transform='translate(-50%,-50%)'; }
+resetCrosshair();
 
-if(isMobile){
-  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
-    document.getElementById('gyroBtn').style.display='block';
-  } else { window.addEventListener('deviceorientation',applyGyro); gyroEnabled=true; }
-}
-
-// ── Desktop: LEFT drag to look, RIGHT click anywhere to shoot ──
-canvas.addEventListener('contextmenu',e=>e.preventDefault()); // block browser context menu
+// ── Desktop: left-drag to pan camera, right-click to shoot ──
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
 canvas.addEventListener('mousedown',e=>{
-  if(e.button===2){ ensureAudio(); shoot(); return; } // right-click → shoot
+  if(e.button===2){ ensureAudio(); shoot(); return; }
   isDragging=true; lastMouseX=e.clientX; lastMouseY=e.clientY;
 });
-window.addEventListener('mouseup',e=>{if(e.button!==2)isDragging=false;});
+window.addEventListener('mouseup',e=>{ if(e.button!==2) isDragging=false; });
 canvas.addEventListener('mousemove',e=>{
   if(!isDragging||!gameRunning) return;
-  camYaw-=(e.clientX-lastMouseX)*0.003; camPitch-=(e.clientY-lastMouseY)*0.002;
+  camYaw  -=(e.clientX-lastMouseX)*0.003;
+  camPitch-=(e.clientY-lastMouseY)*0.002;
   camPitch=Math.max(-0.6,Math.min(0.6,camPitch));
   lastMouseX=e.clientX; lastMouseY=e.clientY;
 });
 
-// ── Mobile: drag to look, tap anywhere to shoot ──
+// ── Mobile: drag moves crosshair, tap shoots ──
 let touchMoved=false;
 canvas.addEventListener('touchstart',e=>{
   touchMoved=false;
@@ -731,9 +716,13 @@ canvas.addEventListener('touchstart',e=>{
 },{passive:true});
 canvas.addEventListener('touchmove',e=>{
   if(!gameRunning) return;
-  const dx=e.touches[0].clientX-lastMouseX, dy=e.touches[0].clientY-lastMouseY;
-  if(Math.abs(dx)>6||Math.abs(dy)>6) touchMoved=true;
-  if(!gyroEnabled){camYaw-=dx*0.003; camPitch-=dy*0.002; camPitch=Math.max(-0.6,Math.min(0.6,camPitch));}
+  const dx=e.touches[0].clientX-lastMouseX;
+  const dy=e.touches[0].clientY-lastMouseY;
+  if(Math.abs(dx)>4||Math.abs(dy)>4) touchMoved=true;
+  // Convert pixel delta to NDC delta and move crosshair
+  const ndx= dx/window.innerWidth *2;
+  const ndy=-dy/window.innerHeight*2;
+  setCrosshair(chX+ndx, chY+ndy);
   lastMouseX=e.touches[0].clientX; lastMouseY=e.touches[0].clientY;
 },{passive:true});
 canvas.addEventListener('touchend',e=>{
@@ -748,7 +737,8 @@ function shoot(){
   if(!gameRunning) return;
   doMuzzleFlash(); playGunshot();
 
-  raycaster.setFromCamera(screenCenter,camera);
+  const aimPoint=new THREE.Vector2(chX,chY);
+  raycaster.setFromCamera(aimPoint,camera);
   const allMeshes=[];
   birds.forEach(b=>{ if(b.alive&&b.hitable) allMeshes.push(b.mesh,...b.mesh.children); });
   pedestrians.forEach(p=>{ if(p.alive&&p.hitable) allMeshes.push(p.mesh,...p.mesh.children); });
@@ -878,7 +868,7 @@ function gameLoop(now){
     if(waveTimer>20000){
       waveTimer=0; wave++; updateWaveUI();
       showFlash('WAVE '+wave+'! 🌊','#ff9f43');
-      gyroBaseAlpha=null; gyroBaseBeta=null;
+      
     }
 
     // Update birds
@@ -925,7 +915,8 @@ function gameLoop(now){
 function startGame(){
   ensureAudio();
   document.getElementById('overlay').style.display='none';
-  gameRunning=true; gyroBaseAlpha=null; gyroBaseBeta=null;
+  resetCrosshair();
+  gameRunning=true;
 }
 function endGame(){
   gameRunning=false;
@@ -943,7 +934,7 @@ function restartGame(){
   particles.forEach(p=>scene.remove(p)); particles=[];
   updateScoreUI(); updateLivesUI(); updateWaveUI();
   document.getElementById('gameoverOverlay').style.display='none';
-  gyroBaseAlpha=null; gyroBaseBeta=null;
+  resetCrosshair();
   gameRunning=true;
 }
 
