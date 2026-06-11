@@ -108,7 +108,7 @@
   </div>
   <div class="hud-box" id="livesBox">
     <div class="hud-label">Lives</div>
-    <div id="hearts">❤️❤️❤️</div>
+    <div id="hearts">❤️❤️❤️❤️</div>
   </div>
 </div>
 
@@ -138,7 +138,7 @@
     <span class="good">✅ Crow → +10 pts (shoot it!)</span><br>
     <span class="bad">❌ Sparrow / Pigeon → -1 life</span><br>
     <span class="bad">❌ Pedestrian / Cyclist → -1 life</span><br>
-    <span class="bad">❌ HDB Window → -1 life</span><br>
+    <span class="bad">❌ HDB Window / Wall → -1 life</span><br>
     🖱️ Right-click anywhere to shoot (desktop)<br>
     👆 Drag to look around · Tap to shoot (mobile)<br>
     🌊 Difficulty rises every wave!
@@ -251,11 +251,12 @@ function playWindowSmash() {
 // ═════════════════════════════════════════════════════════════════════════════
 // STATE
 // ═════════════════════════════════════════════════════════════════════════════
-let score=0, lives=3, wave=1;
+let score=0, lives=4, wave=1;
 let gameRunning=false;
-let birds=[], particles=[], windowObjects=[];
+let birds=[], particles=[], windowObjects=[], flatObjects=[];
 let pedestrians=[];
-let spawnTimer=0, waveTimer=0, pedSpawnTimer=0;
+let landedCrows=[];   // crows that land on the ground briefly
+let spawnTimer=0, waveTimer=0, pedSpawnTimer=0, landTimer=0;
 let flashTimeout=null;
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -273,7 +274,7 @@ scene.background=new THREE.Color(0x87CEEB);
 scene.fog=new THREE.Fog(0xb0d8f0,60,200);
 
 const camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,500);
-camera.position.set(0,6,0);
+camera.position.set(0,1.65,0); // eye level — same height as pedestrians
 
 window.addEventListener('resize',()=>{
   camera.aspect=window.innerWidth/window.innerHeight;
@@ -318,8 +319,12 @@ const WIN_COLORS=[0xb8e0ff,0x95d5f5,0xcdeaff];
 function makeHDBBlock(x,z,height,colorIdx,side){
   const color=HDB_COLORS[colorIdx%HDB_COLORS.length], w=14,d=10;
   const group=new THREE.Group();
+
+  // Main body — register as hittable flat surface
   const body=new THREE.Mesh(new THREE.BoxGeometry(w,height,d),new THREE.MeshLambertMaterial({color}));
-  body.position.y=height/2; body.castShadow=true; body.receiveShadow=true; group.add(body);
+  body.position.y=height/2; body.castShadow=true; body.receiveShadow=true;
+  body.userData.isFlat=true; group.add(body); flatObjects.push(body);
+
   const numFloors=Math.floor(height/3.2);
   for(let f=0;f<numFloors;f++){
     const band=new THREE.Mesh(new THREE.BoxGeometry(w+0.1,0.2,d+0.1),new THREE.MeshLambertMaterial({color:0xffffff}));
@@ -329,6 +334,8 @@ function makeHDBBlock(x,z,height,colorIdx,side){
     const pillar=new THREE.Mesh(new THREE.BoxGeometry(0.5,height,0.5),new THREE.MeshLambertMaterial({color:0xffffff}));
     pillar.position.set(i*(w/2-1.5),height/2,d/2+0.05); group.add(pillar);
   }
+
+  // Windows
   const winGeom=new THREE.BoxGeometry(1.4,1.2,0.1);
   for(let f=0;f<numFloors;f++) for(let c=0;c<4;c++){
     const win=new THREE.Mesh(winGeom,new THREE.MeshPhongMaterial({
@@ -337,6 +344,7 @@ function makeHDBBlock(x,z,height,colorIdx,side){
     win.position.set(-w/2+2+c*3,f*3.2+1.6,side===1?d/2+0.06:-d/2-0.06);
     win.rotation.y=side===-1?Math.PI:0; win.userData.isWindow=true; group.add(win); windowObjects.push(win);
   }
+
   const tank=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.2,2,8),new THREE.MeshLambertMaterial({color:0xcccccc}));
   tank.position.set(w/2-2,height+1,0); group.add(tank);
   const vmat=new THREE.MeshLambertMaterial({color:0xe8e0d0});
@@ -344,6 +352,83 @@ function makeHDBBlock(x,z,height,colorIdx,side){
     const vp=new THREE.Mesh(new THREE.BoxGeometry(0.6,3,0.6),vmat);
     vp.position.set(c*(w/4),1.5,d/2-0.3); group.add(vp);
   }
+
+  // ── Bamboo poles with laundry (Singapore kaypoh style) ──
+  const bambooPoleColor=0xd4b483;
+  const clothColors=[0xff6b9d,0x74b9ff,0xffd32a,0x55efc4,0xff9f43,0xa29bfe,0xf9ca24,0xe17055,0xffffff,0x636e72];
+  const facingZ=side===1?d/2:(-d/2);
+  const poleOffsetZ=side===1?0.18:-0.18; // stick out from the face
+
+  // Pick 3-5 random floors to have bamboo poles
+  const poleFloors=[];
+  for(let f=1;f<numFloors;f++) if(Math.random()<0.45) poleFloors.push(f);
+
+  poleFloors.forEach(f=>{
+    // Random unit column along the width
+    const col=1+Math.floor(Math.random()*3); // columns 1-3 (skip edges)
+    const unitX=-w/2+2+col*3+( Math.random()-0.5)*1.5;
+    const floorY=f*3.2+2.1; // slightly above window sill
+
+    // Bamboo pole — thin cylinder sticking out horizontally from the wall
+    const poleLen=2.2+Math.random()*1.8;
+    const pole=new THREE.Mesh(
+      new THREE.CylinderGeometry(0.04,0.04,poleLen,6),
+      new THREE.MeshLambertMaterial({color:bambooPoleColor})
+    );
+    pole.rotation.z=Math.PI/2; // lay it horizontal along X axis
+    // Offset so the base of the pole is at the wall face
+    const poleOutX= unitX+(poleLen/2)*(side===1?0:0); // along wall face
+    pole.position.set(unitX, floorY, facingZ+poleOffsetZ*(side===1?1:-1));
+    group.add(pole);
+
+    // Hang 2-4 garments along the pole
+    const numItems=2+Math.floor(Math.random()*3);
+    for(let gi=0;gi<numItems;gi++){
+      const t=0.2+gi*(0.7+Math.random()*0.2);
+      if(t>poleLen-0.2) break;
+      const itemX=unitX-poleLen/2+t;
+      const cc=clothColors[Math.floor(Math.random()*clothColors.length)];
+      const clothMat=new THREE.MeshLambertMaterial({color:cc,side:THREE.DoubleSide});
+
+      // Randomly pick shirt, pants, or towel shape
+      const r=Math.random();
+      if(r<0.4){
+        // Shirt — torso rectangle + two short sleeves
+        const torso=new THREE.Mesh(new THREE.PlaneGeometry(0.38,0.5),clothMat);
+        torso.position.set(itemX,floorY-0.28,facingZ+poleOffsetZ*(side===1?1:-1)+0.02);
+        torso.rotation.y=side===1?0:Math.PI;
+        group.add(torso);
+        // sleeves
+        [-0.22,0.22].forEach(sx=>{
+          const sleeve=new THREE.Mesh(new THREE.PlaneGeometry(0.18,0.2),clothMat);
+          sleeve.position.set(itemX+sx,floorY-0.14,facingZ+poleOffsetZ*(side===1?1:-1)+0.02);
+          sleeve.rotation.y=side===1?0:Math.PI;
+          group.add(sleeve);
+        });
+      } else if(r<0.75){
+        // Pants — two legs hanging down
+        [-0.1,0.1].forEach(lx=>{
+          const leg=new THREE.Mesh(new THREE.PlaneGeometry(0.15,0.55),clothMat);
+          leg.position.set(itemX+lx,floorY-0.38,facingZ+poleOffsetZ*(side===1?1:-1)+0.02);
+          leg.rotation.y=side===1?0:Math.PI;
+          group.add(leg);
+        });
+        // waistband
+        const waist=new THREE.Mesh(new THREE.PlaneGeometry(0.32,0.12),clothMat);
+        waist.position.set(itemX,floorY-0.07,facingZ+poleOffsetZ*(side===1?1:-1)+0.02);
+        waist.rotation.y=side===1?0:Math.PI;
+        group.add(waist);
+      } else {
+        // Towel — wide rectangle slightly billowing (rotated a touch)
+        const towel=new THREE.Mesh(new THREE.PlaneGeometry(0.5,0.6),clothMat);
+        towel.position.set(itemX,floorY-0.32,facingZ+poleOffsetZ*(side===1?1:-1)+0.02);
+        towel.rotation.y=(side===1?0:Math.PI)+(Math.random()-0.5)*0.15;
+        towel.rotation.z=(Math.random()-0.5)*0.1;
+        group.add(towel);
+      }
+    }
+  });
+
   group.position.set(x,0,z); scene.add(group); return group;
 }
 
@@ -407,6 +492,20 @@ function makeBirdMesh(type){
   });
   const tail=new THREE.Mesh(new THREE.BoxGeometry(s*0.4,s*0.08,s*0.7),accentMat);
   tail.position.set(0,-s*0.1,-s*0.9); g.add(tail);
+
+  // Legs — visible when crow is standing on ground
+  const legMat=new THREE.MeshLambertMaterial({color:0x2a1a00});
+  [-0.12,0.12].forEach(ox=>{
+    const upper=new THREE.Mesh(new THREE.CylinderGeometry(s*0.06,s*0.06,s*0.5,5),legMat);
+    upper.position.set(ox*s,-s*0.85,0);
+    upper.userData.isLeg=true; g.add(upper);
+    const foot=new THREE.Mesh(new THREE.BoxGeometry(s*0.28,s*0.06,s*0.35),legMat);
+    foot.position.set(ox*s,-s*1.12,s*0.06);
+    foot.userData.isLeg=true; g.add(foot);
+  });
+  // Hide legs by default (only shown when landed)
+  g.children.forEach(c=>{ if(c.userData.isLeg) c.visible=false; });
+
   return g;
 }
 
@@ -443,9 +542,81 @@ function spawnBird(){
   scene.add(mesh); birds.push(birdObj); return birdObj;
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// PEDESTRIAN & CYCLIST SYSTEM
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
+// LANDED BIRDS — any bird glides down, stands still on feet, then flies away
+// ─────────────────────────────────────────────────────────────────────────────
+function spawnLandedBird(type){
+  const mesh=makeBirdMesh(type);
+  const info=BIRD_TYPES[type];
+  const s=info.size;
+
+  const lx=(Math.random()-0.5)*10;
+  const lz=(5+Math.random()*14)*(Math.random()<0.5?1:-1);
+
+  // groundY: bottom of body sphere (y = -s) flush with ground → position.y = s
+  const groundY=s;
+
+  mesh.position.set(lx, 3.5, lz);
+  mesh.rotation.x=0;
+  mesh.rotation.y=Math.random()*Math.PI*2;
+
+  const bird={
+    mesh, s, type, info,
+    alive:true, hitable:true,
+    phase:'landing',
+    groundY,
+    standDuration:3000+Math.random()*4000,
+    standAge:0,
+    wingPhase:Math.random()*Math.PI*2,
+  };
+  scene.add(mesh);
+  landedCrows.push(bird);  // reuse same array — name kept for minimal diff
+}
+
+function updateLandedCrows(dt){
+  landedCrows.forEach(c=>{
+    if(!c.alive) return;
+    c.wingPhase+=dt*0.005;
+
+    if(c.phase==='landing'){
+      c.mesh.position.y-=dt*0.005;
+      c.mesh.children.forEach(ch=>{
+        if(ch.userData.isWing)
+          ch.rotation.z=ch.userData.side*(0.4+Math.sin(c.wingPhase*3)*0.5);
+      });
+
+      if(c.mesh.position.y<=c.groundY){
+        c.mesh.position.y=c.groundY;
+        c.mesh.children.forEach(ch=>{ if(ch.userData.isLeg) ch.visible=true; });
+        c.mesh.children.forEach(ch=>{
+          if(ch.userData.isWing){
+            ch.rotation.z=0;
+            ch.rotation.x=ch.userData.side*0.15;
+          }
+        });
+        c.phase='standing';
+      }
+    }
+    else if(c.phase==='standing'){
+      c.standAge+=dt;
+      if(c.standAge>=c.standDuration) c.phase='takeoff';
+    }
+    else if(c.phase==='takeoff'){
+      c.mesh.children.forEach(ch=>{ if(ch.userData.isLeg) ch.visible=false; });
+      c.mesh.position.y+=dt*0.007;
+      c.mesh.children.forEach(ch=>{
+        if(ch.userData.isWing){
+          ch.rotation.x=0;
+          ch.rotation.z=ch.userData.side*(0.5+Math.sin(c.wingPhase*5)*0.6);
+        }
+      });
+      if(c.mesh.position.y>6){ scene.remove(c.mesh); c.alive=false; }
+    }
+  });
+  landedCrows=landedCrows.filter(c=>c.alive);
+}
+
+
 const SHIRT_COLORS=[0xff6b9d,0x74b9ff,0x55efc4,0xffd32a,0xff9f43,0xa29bfe,0xfd79a8,0xf9ca24,0x6ab04c,0xe17055];
 const PANT_COLORS=[0x2d3436,0x636e72,0x0984e3,0x6c5ce7,0x2d3436,0x00b894,0xd63031,0x2c3e50];
 
@@ -720,8 +891,10 @@ function shoot(){
   raycaster.setFromCamera(aimPoint,camera);
   const allMeshes=[];
   birds.forEach(b=>{ if(b.alive&&b.hitable) allMeshes.push(b.mesh,...b.mesh.children); });
+  landedCrows.forEach(c=>{ if(c.alive&&c.hitable) allMeshes.push(c.mesh,...c.mesh.children); });
   pedestrians.forEach(p=>{ if(p.alive&&p.hitable) allMeshes.push(p.mesh,...p.mesh.children); });
   windowObjects.forEach(w=>allMeshes.push(w));
+  flatObjects.forEach(f=>allMeshes.push(f));
 
   const hits=raycaster.intersectObjects(allMeshes,false);
   if(hits.length>0){
@@ -737,6 +910,20 @@ function shoot(){
         spawnParticles(hitPos,0xffd32a,22,true); showFlash('+'+pts+' 🐦‍⬛','#ffd32a'); playCrowHit();
       } else {
         loseLife(); spawnParticles(hitPos,0xff6b6b,16,false); showFlash(hitBird.info.label,'#ff6b6b'); playInnocentHit();
+      }
+      return;
+    }
+
+    // Landed bird (crow or innocent)
+    let hitLanded=null;
+    for(const c of landedCrows){ if(!c.alive||!c.hitable)continue; if(c.mesh===hit.object||c.mesh.children.includes(hit.object)){hitLanded=c;break;} }
+    if(hitLanded){
+      hitLanded.alive=false; hitLanded.hitable=false; scene.remove(hitLanded.mesh); landedCrows=landedCrows.filter(c=>c!==hitLanded);
+      if(!hitLanded.info.bad){
+        const pts=15+(wave-1)*2; score+=pts; updateScoreUI();
+        spawnParticles(hitPos,0xffd32a,22,true); showFlash('+'+pts+' 🐦‍⬛','#ffd32a'); playCrowHit();
+      } else {
+        loseLife(); spawnParticles(hitPos,0xff6b6b,16,false); showFlash(hitLanded.info.label,'#ff6b6b'); playInnocentHit();
       }
       return;
     }
@@ -758,6 +945,13 @@ function shoot(){
       const orig=hit.object.material.color.clone();
       hit.object.material.color.set(0xff4444);
       setTimeout(()=>hit.object.material.color.copy(orig),350);
+      return;
+    }
+
+    // HDB flat wall
+    if(hit.object.userData.isFlat){
+      loseLife(); spawnParticles(hitPos,0xaaaaaa,10,false);
+      showFlash('SHOT THE FLAT! -1 ❤️','#ff6b6b'); playWindowSmash();
     }
   }
 }
@@ -776,7 +970,7 @@ function loseLife(){
   if(lives<=0) endGame();
 }
 function updateScoreUI(){document.getElementById('scoreVal').textContent=score;}
-function updateLivesUI(){document.getElementById('hearts').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives);}
+function updateLivesUI(){document.getElementById('hearts').textContent='❤️'.repeat(lives)+'🖤'.repeat(4-lives);}
 function updateWaveUI() {document.getElementById('waveVal').textContent=wave;}
 function showFlash(text,color){
   const el=document.getElementById('flashMsg');
@@ -850,6 +1044,18 @@ function gameLoop(now){
       
     }
 
+    // Spawn landed birds independently (crow ~50%, sparrow ~25%, pigeon ~25%)
+    const landInterval=Math.max(5000-wave*300,2000);
+    landTimer+=dt;
+    if(landTimer>landInterval){
+      landTimer=0;
+      if(landedCrows.length<2+Math.floor(wave*0.4)){
+        const r=Math.random();
+        const ltype=r<0.5?'crow':r<0.75?'sparrow':'pigeon';
+        spawnLandedBird(ltype);
+      }
+    }
+
     // Update birds
     birds.forEach(b=>{
       if(!b.alive) return;
@@ -872,6 +1078,9 @@ function gameLoop(now){
 
     // Update pedestrians
     updatePedestrians(dt);
+
+    // Update landed crows
+    updateLandedCrows(dt);
 
     // Particles
     particles.forEach(p=>{
@@ -900,20 +1109,21 @@ function startGame(){
 function endGame(){
   gameRunning=false;
   birds.forEach(b=>scene.remove(b.mesh)); birds=[];
+  landedCrows.forEach(c=>scene.remove(c.mesh)); landedCrows=[];
   pedestrians.forEach(p=>scene.remove(p.mesh)); pedestrians=[];
   document.getElementById('finalScore').textContent='Score: '+score;
   document.getElementById('gameoverOverlay').style.display='flex';
 }
 function restartGame(){
   ensureAudio();
-  score=0; lives=3; wave=1;
-  spawnTimer=0; waveTimer=0; pedSpawnTimer=0;
+  score=0; lives=4; wave=1;
+  spawnTimer=0; waveTimer=0; pedSpawnTimer=0; landTimer=0;
   birds.forEach(b=>scene.remove(b.mesh)); birds=[];
+  landedCrows.forEach(c=>scene.remove(c.mesh)); landedCrows=[];
   pedestrians.forEach(p=>scene.remove(p.mesh)); pedestrians=[];
   particles.forEach(p=>scene.remove(p)); particles=[];
   updateScoreUI(); updateLivesUI(); updateWaveUI();
   document.getElementById('gameoverOverlay').style.display='none';
-
   gameRunning=true;
 }
 
