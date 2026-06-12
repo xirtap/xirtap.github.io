@@ -135,7 +135,8 @@
   <h1>🐦‍⬛ Shoot Bird!</h1>
   <p class="subtitle">Protect the HDB void deck from crafty crows!<br>Watch out for innocent birds and pedestrians!</p>
   <div class="rules-box">
-    <span class="good">✅ Crow → +10 pts (shoot it!)</span><br>
+    <span class="good">✅ Crow → +10 pts · Diving crow → +20 pts</span><br>
+    <span class="bad">❌ Crow collision → -1 life (shoot it fast!)</span><br>
     <span class="bad">❌ Sparrow / Pigeon → -1 life</span><br>
     <span class="bad">❌ Pedestrian / Cyclist → -1 life</span><br>
     <span class="bad">❌ HDB Window / Wall → -1 life</span><br>
@@ -255,8 +256,9 @@ let score=0, lives=4, wave=1;
 let gameRunning=false;
 let birds=[], particles=[], windowObjects=[], flatObjects=[];
 let pedestrians=[];
-let landedCrows=[];   // crows that land on the ground briefly
-let spawnTimer=0, waveTimer=0, pedSpawnTimer=0, landTimer=0;
+let landedCrows=[];
+let divingCrows=[];   // crows that charge straight at the player
+let spawnTimer=0, waveTimer=0, pedSpawnTimer=0, landTimer=0, diveTimer=0;
 let flashTimeout=null;
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -543,8 +545,85 @@ function spawnBird(){
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// LANDED BIRDS — any bird glides down, stands still on feet, then flies away
+// DIVING CROWS — charge straight at the player to attack
 // ─────────────────────────────────────────────────────────────────────────────
+function spawnDivingCrow(){
+  const mesh=makeBirdMesh('crow');
+
+  // Spawn far away (40-55 units) so player has plenty of time to react and shoot
+  const angle=Math.random()*Math.PI*2;
+  const dist=40+Math.random()*15;
+  const sx=camera.position.x+Math.cos(angle)*dist;
+  const sz=camera.position.z+Math.sin(angle)*dist;
+  const sy=1.2+Math.random()*1.8; // eye-level height so it's visible in the viewport
+
+  mesh.position.set(sx,sy,sz);
+
+  // Point beak toward player
+  const dir=new THREE.Vector3(
+    camera.position.x-sx, camera.position.y-sy, camera.position.z-sz
+  ).normalize();
+  mesh.rotation.y=Math.atan2(dir.x,dir.z);
+
+  // Slow speed — gives player time to turn and shoot
+  // Base 0.025, grows gently with wave
+  const speed=0.025+wave*0.005+Math.random()*0.01;
+
+  const crow={
+    mesh,
+    alive:true, hitable:true,
+    dir: dir.clone(),
+    speed,
+    wingPhase:Math.random()*Math.PI*2,
+    warningShown:false,
+  };
+  scene.add(mesh);
+  divingCrows.push(crow);
+}
+
+function updateDivingCrows(dt){
+  divingCrows.forEach(c=>{
+    if(!c.alive) return;
+    c.wingPhase+=dt*0.007; // steady flap, not frantic
+
+    // Wing flap
+    c.mesh.children.forEach(ch=>{
+      if(ch.userData.isWing)
+        ch.rotation.z=ch.userData.side*(0.3+Math.sin(c.wingPhase)*0.5);
+    });
+
+    // Move straight toward player
+    c.mesh.position.x+=c.dir.x*c.speed*dt*0.055;
+    c.mesh.position.y+=c.dir.y*c.speed*dt*0.055;
+    c.mesh.position.z+=c.dir.z*c.speed*dt*0.055;
+
+    // Distance to player
+    const dx=c.mesh.position.x-camera.position.x;
+    const dy=c.mesh.position.y-camera.position.y;
+    const dz=c.mesh.position.z-camera.position.z;
+    const dist=Math.sqrt(dx*dx+dy*dy+dz*dz);
+
+    // Warn player when crow is within 20 units — early enough to turn and aim
+    if(!c.warningShown && dist<20){
+      c.warningShown=true;
+      showFlash('🐦‍⬛ CROW INCOMING!','#ff9f43');
+    }
+
+    // Collision — within 1.2 units of camera (player head)
+    if(dist<1.2){
+      scene.remove(c.mesh); c.alive=false;
+      loseLife();
+      spawnParticles(camera.position.clone().add(new THREE.Vector3(0,0,-0.5)),0xff3a3a,20,true);
+      showFlash('CROW HIT YOU! -1 ❤️','#ff3a3a');
+      playInnocentHit(); // sharp penalty buzz
+      return;
+    }
+
+    // Gone past player or too far — remove
+    if(dist>55){ scene.remove(c.mesh); c.alive=false; }
+  });
+  divingCrows=divingCrows.filter(c=>c.alive);
+}
 function spawnLandedBird(type){
   const mesh=makeBirdMesh(type);
   const info=BIRD_TYPES[type];
@@ -891,6 +970,7 @@ function shoot(){
   raycaster.setFromCamera(aimPoint,camera);
   const allMeshes=[];
   birds.forEach(b=>{ if(b.alive&&b.hitable) allMeshes.push(b.mesh,...b.mesh.children); });
+  divingCrows.forEach(c=>{ if(c.alive&&c.hitable) allMeshes.push(c.mesh,...c.mesh.children); });
   landedCrows.forEach(c=>{ if(c.alive&&c.hitable) allMeshes.push(c.mesh,...c.mesh.children); });
   pedestrians.forEach(p=>{ if(p.alive&&p.hitable) allMeshes.push(p.mesh,...p.mesh.children); });
   windowObjects.forEach(w=>allMeshes.push(w));
@@ -911,6 +991,16 @@ function shoot(){
       } else {
         loseLife(); spawnParticles(hitPos,0xff6b6b,16,false); showFlash(hitBird.info.label,'#ff6b6b'); playInnocentHit();
       }
+      return;
+    }
+
+    // Diving crow — bonus points for shooting it down mid-attack
+    let hitDiver=null;
+    for(const c of divingCrows){ if(!c.alive||!c.hitable)continue; if(c.mesh===hit.object||c.mesh.children.includes(hit.object)){hitDiver=c;break;} }
+    if(hitDiver){
+      hitDiver.alive=false; hitDiver.hitable=false; scene.remove(hitDiver.mesh); divingCrows=divingCrows.filter(c=>c!==hitDiver);
+      const pts=20+(wave-1)*2; score+=pts; updateScoreUI();
+      spawnParticles(hitPos,0xff6b6b,26,true); showFlash('+'+pts+' CROW DOWN! 💥','#ffd32a'); playCrowHit();
       return;
     }
 
@@ -1056,6 +1146,16 @@ function gameLoop(now){
       }
     }
 
+    // Spawn diving crows (wave 2+, ~every 8-12s)
+    if(wave>=2){
+      const diveInterval=Math.max(10000-wave*600,4000);
+      diveTimer+=dt;
+      if(diveTimer>diveInterval){
+        diveTimer=0;
+        if(Math.random()<0.6) spawnDivingCrow();
+      }
+    }
+
     // Update birds
     birds.forEach(b=>{
       if(!b.alive) return;
@@ -1079,8 +1179,11 @@ function gameLoop(now){
     // Update pedestrians
     updatePedestrians(dt);
 
-    // Update landed crows
+    // Update landed birds
     updateLandedCrows(dt);
+
+    // Update diving crows
+    updateDivingCrows(dt);
 
     // Particles
     particles.forEach(p=>{
@@ -1110,6 +1213,7 @@ function endGame(){
   gameRunning=false;
   birds.forEach(b=>scene.remove(b.mesh)); birds=[];
   landedCrows.forEach(c=>scene.remove(c.mesh)); landedCrows=[];
+  divingCrows.forEach(c=>scene.remove(c.mesh)); divingCrows=[];
   pedestrians.forEach(p=>scene.remove(p.mesh)); pedestrians=[];
   document.getElementById('finalScore').textContent='Score: '+score;
   document.getElementById('gameoverOverlay').style.display='flex';
@@ -1117,9 +1221,10 @@ function endGame(){
 function restartGame(){
   ensureAudio();
   score=0; lives=4; wave=1;
-  spawnTimer=0; waveTimer=0; pedSpawnTimer=0; landTimer=0;
+  spawnTimer=0; waveTimer=0; pedSpawnTimer=0; landTimer=0; diveTimer=0;
   birds.forEach(b=>scene.remove(b.mesh)); birds=[];
   landedCrows.forEach(c=>scene.remove(c.mesh)); landedCrows=[];
+  divingCrows.forEach(c=>scene.remove(c.mesh)); divingCrows=[];
   pedestrians.forEach(p=>scene.remove(p.mesh)); pedestrians=[];
   particles.forEach(p=>scene.remove(p)); particles=[];
   updateScoreUI(); updateLivesUI(); updateWaveUI();
