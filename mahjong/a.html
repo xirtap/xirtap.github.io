@@ -340,7 +340,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b1210);
 scene.fog = new THREE.Fog(0x0b1210, 22, 42);
 
-const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 100);
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 300);
 const BASE_CAM_POS = new THREE.Vector3(0, 17, 15.5);
 const BASE_LOOKAT = new THREE.Vector3(0, 0, 2);
 const BASE_ASPECT = 16/9;
@@ -348,7 +348,9 @@ const BASE_ASPECT = 16/9;
 // On narrow (portrait/mobile) screens, the horizontal field of view shrinks and
 // the left/right seats fall outside the frame. Zooming the camera back along its
 // view direction compresses all angular extents so every seat stays visible,
-// regardless of aspect ratio.
+// regardless of aspect ratio. The fog distances must scale with this zoom too,
+// otherwise the table ends up beyond the fog's far distance and gets washed out
+// to the background color (looking like a black/empty screen on phones).
 function updateCameraForAspect(aspect){
   let zoomFactor = 1;
   if(aspect < BASE_ASPECT){
@@ -357,6 +359,9 @@ function updateCameraForAspect(aspect){
   const dir = BASE_CAM_POS.clone().sub(BASE_LOOKAT).multiplyScalar(zoomFactor);
   camera.position.copy(BASE_LOOKAT).add(dir);
   camera.lookAt(BASE_LOOKAT);
+  const distToTable = camera.position.length();
+  scene.fog.near = Math.max(1, distToTable - 1);
+  scene.fog.far = distToTable + 19;
 }
 
 function resize(){
