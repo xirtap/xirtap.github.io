@@ -340,10 +340,11 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b1210);
 scene.fog = new THREE.Fog(0x0b1210, 22, 42);
 
-const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 300);
-const BASE_CAM_POS = new THREE.Vector3(0, 17, 15.5);
-const BASE_LOOKAT = new THREE.Vector3(0, 0, 2);
+const camera = new THREE.PerspectiveCamera(58, window.innerWidth/window.innerHeight, 0.1, 300);
+const BASE_CAM_POS = new THREE.Vector3(0, 11, 11.75);
+const BASE_LOOKAT = new THREE.Vector3(0, 0, 3.5);
 const BASE_ASPECT = 16/9;
+const ZOOM_CAP = 4.0;
 
 // On narrow (portrait/mobile) screens, the horizontal field of view shrinks and
 // the left/right seats fall outside the frame. Zooming the camera back along its
@@ -354,7 +355,7 @@ const BASE_ASPECT = 16/9;
 function updateCameraForAspect(aspect){
   let zoomFactor = 1;
   if(aspect < BASE_ASPECT){
-    zoomFactor = Math.min(BASE_ASPECT/aspect, 2.3);
+    zoomFactor = Math.min(BASE_ASPECT/aspect, ZOOM_CAP);
   }
   const dir = BASE_CAM_POS.clone().sub(BASE_LOOKAT).multiplyScalar(zoomFactor);
   camera.position.copy(BASE_LOOKAT).add(dir);
@@ -381,18 +382,21 @@ const fillLight = new THREE.PointLight(0x88ccff, 0.25, 40);
 fillLight.position.set(-6, 8, -6);
 scene.add(fillLight);
 
-// Table
-const tableGeo = new THREE.CylinderGeometry(11.5, 11.5, 0.6, 48);
-const tableMat = new THREE.MeshStandardMaterial({color:0x1c4d34, roughness:0.85});
-const table = new THREE.Mesh(tableGeo, tableMat);
-table.position.y = -0.3;
+// Table — square, matching the four-seat layout, with a wooden border framing
+// a green felt playing surface (like a traditional square mahjong table).
+const FELT_HALF = 10.6;
+const BORDER_HALF = 11.6;
+const borderGeo = new THREE.BoxGeometry(BORDER_HALF*2, 0.5, BORDER_HALF*2);
+const borderMat = new THREE.MeshStandardMaterial({color:0x3b2418, roughness:0.6, metalness:0.15});
+const border = new THREE.Mesh(borderGeo, borderMat);
+border.position.y = -0.32;
+scene.add(border);
+
+const feltGeo = new THREE.BoxGeometry(FELT_HALF*2, 0.5, FELT_HALF*2);
+const feltMat = new THREE.MeshStandardMaterial({color:0x1c4d34, roughness:0.85});
+const table = new THREE.Mesh(feltGeo, feltMat);
+table.position.y = -0.28;
 scene.add(table);
-const rimGeo = new THREE.TorusGeometry(11.5, 0.28, 12, 48);
-const rimMat = new THREE.MeshStandardMaterial({color:0x3b2418, roughness:0.6, metalness:0.2});
-const rim = new THREE.Mesh(rimGeo, rimMat);
-rim.rotation.x = Math.PI/2;
-rim.position.y = 0.0;
-scene.add(rim);
 
 /* ============================= TILE MESHES ============================= */
 const TILE_W = 0.9, TILE_H = 0.55, TILE_D = 1.25;
@@ -542,10 +546,10 @@ function clearGroup(g){ while(g.children.length){ g.remove(g.children[0]); } }
 
 // seat orientation config: axis along which hand/discard is spread, and base offset
 const SEAT_CFG = [
-  {axis:'x', handZ: 8.4, meldZ: 9.9, discBaseZ: 3.0, discRowStep:-1.15, sign:1, faceDown:false},
-  {axis:'z', handX: 8.4, meldX: 9.9, discBaseX: 3.0, discRowStep:-1.15, sign:1, faceDown:true},
-  {axis:'x', handZ: -8.4, meldZ: -9.9, discBaseZ: -3.0, discRowStep:1.15, sign:-1, faceDown:true},
-  {axis:'z', handX: -8.4, meldX: -9.9, discBaseX: -3.0, discRowStep:1.15, sign:-1, faceDown:true}
+  {axis:'x', handZ: 8.1, meldZ: 9.7, discBaseZ: 3.0, discRowStep:-1.15, sign:1, faceDown:false},
+  {axis:'z', handX: 8.1, meldX: 9.7, discBaseX: 3.0, discRowStep:-1.15, sign:1, faceDown:true},
+  {axis:'x', handZ: -8.1, meldZ: -9.7, discBaseZ: -3.0, discRowStep:1.15, sign:-1, faceDown:true},
+  {axis:'z', handX: -8.1, meldX: -9.7, discBaseX: -3.0, discRowStep:1.15, sign:-1, faceDown:true}
 ];
 
 function layoutHand(player){
