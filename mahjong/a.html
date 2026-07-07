@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>简单 Mahjong</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+    background: #0b1210; font-family: 'Segoe UI', Arial, sans-serif; color: #e8e6df;
+  }
+  #gameCanvas { display: block; width: 100%; height: 100%; }
+
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 18px;
+    background: linear-gradient(to bottom, rgba(10,16,14,0.9), rgba(10,16,14,0));
+    pointer-events: none; z-index: 10;
+  }
+  #topbar .title { font-size: 18px; font-weight: 700; letter-spacing: 0.5px; color: #d4af6a; }
+  #topbar .info { display: flex; gap: 18px; font-size: 13px; color: #b9c2ba; }
+  #topbar .info span b { color: #e8e6df; }
+  #helpBtn, #newGameBtn {
+    pointer-events: all; cursor: pointer; background: rgba(30,40,36,0.85);
+    border: 1px solid #3a4a42; color: #e8e6df; padding: 6px 12px; border-radius: 6px;
+    font-size: 12px; margin-left: 8px;
+  }
+  #helpBtn:hover, #newGameBtn:hover { background: rgba(50,65,58,0.9); }
+
+  #message {
+    position: fixed; top: 58px; left: 50%; transform: translateX(-50%);
+    background: rgba(15,22,19,0.88); border: 1px solid #3a4a42; border-radius: 8px;
+    padding: 8px 20px; font-size: 14px; color: #e8e6df; z-index: 10;
+    min-width: 220px; text-align: center; pointer-events: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+  }
+
+  #actionPanel {
+    position: fixed; bottom: 34%; left: 50%; transform: translateX(-50%);
+    display: none; gap: 10px; z-index: 20;
+  }
+  #actionPanel button {
+    cursor: pointer; padding: 10px 22px; font-size: 15px; font-weight: 600;
+    border-radius: 8px; border: 1px solid #d4af6a; background: #1b2620; color: #d4af6a;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5); transition: all 0.15s;
+  }
+  #actionPanel button:hover { background: #d4af6a; color: #1b2620; }
+  #actionPanel button.skip { border-color: #6a7a72; color: #b9c2ba; }
+  #actionPanel button.skip:hover { background: #6a7a72; color: #0b1210; }
+
+  #helpOverlay {
+    position: fixed; inset: 0; background: rgba(5,10,8,0.85);
+    display: none; align-items: center; justify-content: center; z-index: 50;
+  }
+  #helpOverlay .box {
+    background: #141f1a; border: 1px solid #3a4a42; border-radius: 12px;
+    max-width: 520px; padding: 24px 28px; line-height: 1.6; font-size: 14px;
+  }
+  #helpOverlay h2 { margin-top: 0; color: #d4af6a; }
+  #helpOverlay button {
+    margin-top: 14px; cursor: pointer; padding: 8px 16px; border-radius: 6px;
+    border: 1px solid #d4af6a; background: transparent; color: #d4af6a;
+  }
+  #helpOverlay button:hover { background: #d4af6a; color: #141f1a; }
+
+  #endOverlay {
+    position: fixed; inset: 0; background: rgba(5,10,8,0.75);
+    display: none; align-items: center; justify-content: center; z-index: 60;
+  }
+  #endOverlay .box {
+    background: #141f1a; border: 1px solid #d4af6a; border-radius: 12px;
+    padding: 30px 40px; text-align: center;
+  }
+  #endOverlay h2 { color: #d4af6a; margin-top: 0; }
+  #endOverlay button {
+    margin-top: 16px; cursor: pointer; padding: 10px 24px; border-radius: 8px;
+    border: none; background: #d4af6a; color: #14201a; font-weight: 700; font-size: 15px;
+  }
+
+  #seatLabels div {
+    position: fixed; font-size: 12px; color: #b9c2ba; z-index: 5; pointer-events: none;
+    background: rgba(10,16,14,0.6); padding: 3px 8px; border-radius: 5px;
+  }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="title">简单 Mahjong</div>
+  <div class="info">
+    <span>Wall: <b id="wallCount">0</b></span>
+    <span>Turn: <b id="turnName">-</b></span>
+    <button id="helpBtn">How to Play</button>
+    <button id="newGameBtn">New Game</button>
+  </div>
+</div>
+
+<div id="message">Welcome! Click "New Game" to start.</div>
+<div id="actionPanel"></div>
+
+<div id="helpOverlay">
+  <div class="box">
+    <h2>How to Play (Beginner Mode)</h2>
+    <p><b>Goal:</b> Be the first to complete a hand of 4 sets + 1 pair (14 tiles total).</p>
+    <p><b>Sets</b> are either three identical tiles (triplet) or three consecutive numbers of the same suit (sequence — sequences only count for Characters, Bamboo, and Dots). Winds and Dragons can only form triplets.</p>
+    <p><b>Your turn:</b> A tile is drawn automatically for you. Click a tile in your hand (bottom row) to discard it.</p>
+    <p><b>Calling tiles:</b> When any player discards a tile you need, you may be offered <b>Pung</b> (claim it to complete a triplet from a matching pair in your hand) or <b>Win</b> (claim it to complete your winning hand). Buttons appear when available — respond quickly or it will be skipped!</p>
+    <p><b>Self-draw win:</b> If the tile you draw completes your hand, you'll be offered the Win button immediately.</p>
+    <p>This simplified beginner mode skips Chow (sequence calls), Kong, flowers, and detailed fan scoring — first valid hand simply wins the round.</p>
+    <button id="closeHelp">Got it</button>
+  </div>
+</div>
+
+<div id="endOverlay">
+  <div class="box">
+    <h2 id="endTitle">Game Over</h2>
+    <p id="endDesc"></p>
+    <button id="playAgainBtn">Play Again</button>
+  </div>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================= AUDIO ============================= */
+let audioCtx = null;
+function ensureAudio(){
+  if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+  if(audioCtx && audioCtx.state === 'suspended'){ audioCtx.resume(); }
+}
+function playTone(freq, dur, type, vol){
+  if(!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  gain.gain.value = (vol!==undefined?vol:0.08);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  const now = audioCtx.currentTime;
+  gain.gain.setValueAtTime(gain.gain.value, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+  osc.start(now); osc.stop(now + dur);
+}
+function sfxDraw(){ playTone(520, 0.08, 'triangle', 0.06); }
+function sfxDiscard(){
+  // percussive tile "clack" using filtered noise burst
+  if(!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const dur = 0.09;
+  const bufferSize = Math.max(1, Math.floor(audioCtx.sampleRate*dur));
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * Math.pow(1 - i/bufferSize, 2); }
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+  const bandpass = audioCtx.createBiquadFilter();
+  bandpass.type = 'bandpass'; bandpass.frequency.value = 1900; bandpass.Q.value = 1.1;
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.4, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+  noise.connect(bandpass); bandpass.connect(gain); gain.connect(audioCtx.destination);
+  noise.start(now); noise.stop(now + dur);
+  // sharp low knock underneath for weight
+  playTone(150, 0.05, 'square', 0.05);
+}
+function sfxPung(){ playTone(200,0.08,'sawtooth',0.07); setTimeout(()=>playTone(260,0.12,'sawtooth',0.07),80); }
+function sfxKong(){
+  // deeper resonant "gong" chime — ready for Kong calls
+  if(!audioCtx) return;
+  const now = audioCtx.currentTime;
+  [110, 165, 220].forEach((f,i)=>{
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = i===0 ? 'sine' : 'triangle';
+    osc.frequency.value = f;
+    const vol = 0.12 - i*0.03;
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    gain.gain.setValueAtTime(vol, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.1);
+    osc.start(now); osc.stop(now + 1.1);
+  });
+}
+function sfxWin(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>playTone(f,0.35,'triangle',0.09), i*140)); }
+function sfxClick(){ playTone(700,0.05,'sine',0.04); }
+
+/* ============================= TILE DATA ============================= */
+const NUM_SUITS = ['characters','bamboo','dots'];
+const WINDS = ['E','S','W','N'];
+const DRAGONS = ['red','green','white'];
+
+function buildWall(){
+  const tiles = [];
+  let uid = 0;
+  NUM_SUITS.forEach(suit=>{
+    for(let v=1; v<=9; v++){
+      for(let c=0;c<4;c++) tiles.push({suit, value:v, uid: uid++});
+    }
+  });
+  WINDS.forEach(w=>{
+    for(let c=0;c<4;c++) tiles.push({suit:'wind', value:w, uid: uid++});
+  });
+  DRAGONS.forEach(d=>{
+    for(let c=0;c<4;c++) tiles.push({suit:'dragon', value:d, uid: uid++});
+  });
+  return tiles;
+}
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+function tileKey(t){ return t.suit+'_'+t.value; }
+
+/* ============================= WIN-CHECK ALGORITHM ============================= */
+function countTiles(tiles){
+  const counts = {};
+  tiles.forEach(t=>{ const k=tileKey(t); counts[k]=(counts[k]||0)+1; });
+  return counts;
+}
+function canFormSets(counts, keysSorted){
+  let key=null;
+  for(const k of keysSorted){ if(counts[k]>0){ key=k; break; } }
+  if(!key) return true;
+  const [suit, valueStr] = key.split('_');
+  const value = parseInt(valueStr);
+  if(counts[key]>=3){
+    counts[key]-=3;
+    if(canFormSets(counts, keysSorted)){ counts[key]+=3; return true; }
+    counts[key]+=3;
+  }
+  if(NUM_SUITS.includes(suit) && value<=7){
+    const k2 = suit+'_'+(value+1), k3 = suit+'_'+(value+2);
+    if((counts[k2]||0)>0 && (counts[k3]||0)>0){
+      counts[key]--; counts[k2]--; counts[k3]--;
+      if(canFormSets(counts, keysSorted)){ counts[key]++; counts[k2]++; counts[k3]++; return true; }
+      counts[key]++; counts[k2]++; counts[k3]++;
+    }
+  }
+  return false;
+}
+function isWinningHand(tiles){
+  if(tiles.length !== 14) return false;
+  const counts = countTiles(tiles);
+  const keys = Object.keys(counts);
+  for(const pairKey of keys){
+    if(counts[pairKey]>=2){
+      counts[pairKey]-=2;
+      const keysSorted = Object.keys(counts).sort();
+      if(canFormSets(counts, keysSorted)){ counts[pairKey]+=2; return true; }
+      counts[pairKey]+=2;
+    }
+  }
+  return false;
+}
+
+/* ============================= AI HEURISTIC ============================= */
+function scoreTileUsefulness(tile, hand){
+  let score = 0;
+  const sameCount = hand.filter(t=>t.suit===tile.suit && t.value===tile.value).length;
+  score += (sameCount-1)*10;
+  if(NUM_SUITS.includes(tile.suit)){
+    for(let d=-2; d<=2; d++){
+      if(d===0) continue;
+      const v = tile.value + d;
+      if(v>=1 && v<=9){
+        if(hand.some(t=>t.suit===tile.suit && t.value===v)) score += (3-Math.abs(d))*2;
+      }
+    }
+  }
+  return score;
+}
+function chooseAIDiscard(hand){
+  let best = null, bestScore = Infinity;
+  const scored = hand.map(t=>({t, s:scoreTileUsefulness(t, hand)}));
+  scored.forEach(o=>{ if(o.s < bestScore){ bestScore = o.s; } });
+  const candidates = scored.filter(o=>o.s === bestScore);
+  best = candidates[Math.floor(Math.random()*candidates.length)].t;
+  return best;
+}
+
+/* ============================= GAME STATE ============================= */
+const SEATS = ['You','East AI','North AI','West AI']; // seat 0 = human
+let wall = [];
+let hands = [[],[],[],[]];
+let melds = [[],[],[],[]]; // arrays of triplet arrays [t,t,t]
+let discards = [[],[],[],[]];
+let currentPlayer = 0;
+let gameRunning = false;
+let awaitingHumanDiscard = null; // resolver function
+let humanCanDiscardNow = false;
+
+function getFullHand(p){
+  let full = hands[p].slice();
+  melds[p].forEach(m=> full = full.concat(m));
+  return full;
+}
+
+/* ============================= THREE.JS SETUP ============================= */
+const canvas = document.getElementById('gameCanvas');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+function resize(){
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+}
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b1210);
+scene.fog = new THREE.Fog(0x0b1210, 22, 42);
+
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.set(0, 17, 15.5);
+camera.lookAt(0, 0, 2);
+
+const ambient = new THREE.AmbientLight(0xffffff, 0.55);
+scene.add(ambient);
+const dirLight = new THREE.DirectionalLight(0xfff2d9, 0.85);
+dirLight.position.set(5, 14, 6);
+scene.add(dirLight);
+const fillLight = new THREE.PointLight(0x88ccff, 0.25, 40);
+fillLight.position.set(-6, 8, -6);
+scene.add(fillLight);
+
+// Table
+const tableGeo = new THREE.CylinderGeometry(11.5, 11.5, 0.6, 48);
+const tableMat = new THREE.MeshStandardMaterial({color:0x1c4d34, roughness:0.85});
+const table = new THREE.Mesh(tableGeo, tableMat);
+table.position.y = -0.3;
+scene.add(table);
+const rimGeo = new THREE.TorusGeometry(11.5, 0.28, 12, 48);
+const rimMat = new THREE.MeshStandardMaterial({color:0x3b2418, roughness:0.6, metalness:0.2});
+const rim = new THREE.Mesh(rimGeo, rimMat);
+rim.rotation.x = Math.PI/2;
+rim.position.y = 0.0;
+scene.add(rim);
+
+/* ============================= TILE MESHES ============================= */
+const TILE_W = 0.9, TILE_H = 0.55, TILE_D = 1.25;
+const sharedGeo = new THREE.BoxGeometry(TILE_W, TILE_H, TILE_D);
+const sideColor = 0xf2ecd8;
+const sideMat = new THREE.MeshStandardMaterial({color: sideColor, roughness:0.7});
+const edgeMat = new THREE.MeshStandardMaterial({color: 0xd8cfae, roughness:0.7});
+
+function makeCanvas(w,h){
+  const c = document.createElement('canvas'); c.width=w; c.height=h;
+  return c;
+}
+function backTextureCanvas(){
+  const c = makeCanvas(128,178);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#f6c9dc'; ctx.fillRect(0,0,c.width,c.height);
+  ctx.strokeStyle = '#eda9c6'; ctx.lineWidth = 6;
+  for(let i=-c.height;i<c.width;i+=18){
+    ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+c.height,c.height); ctx.stroke();
+  }
+  ctx.strokeStyle = '#dd85ac'; ctx.lineWidth = 8;
+  ctx.strokeRect(4,4,c.width-8,c.height-8);
+  return c;
+}
+const backTexture = new THREE.CanvasTexture(backTextureCanvas());
+const backMat = new THREE.MeshStandardMaterial({map: backTexture, roughness:0.6});
+
+function drawCharacters(ctx, w, h, value){
+  ctx.fillStyle = '#0b1e63';
+  ctx.font = 'bold ' + Math.floor(h*0.34) + 'px "Songti SC","SimSun",serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(String(value), w/2, h*0.32);
+  ctx.fillStyle = '#c21f1f';
+  ctx.font = Math.floor(h*0.3) + 'px "Songti SC","SimSun",serif';
+  ctx.fillText('萬', w/2, h*0.68);
+}
+function drawBamboo(ctx, w, h, value){
+  ctx.fillStyle = '#0b1e63';
+  ctx.font = 'bold ' + Math.floor(h*0.16) + 'px sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const cols = value<=3 ? value : Math.ceil(value/2);
+  const rows = value<=3 ? 1 : 2;
+  const perRow = Math.ceil(value/rows);
+  let idx=0;
+  const marginY = h*0.18;
+  for(let r=0;r<rows && idx<value;r++){
+    const rowCount = Math.min(perRow, value-idx);
+    for(let c=0;c<rowCount;c++){
+      const x = w/2 + (c-(rowCount-1)/2)*(w*0.24);
+      const y = marginY + r*(h*0.32) + h*0.14 + (rows===1? h*0.18:0);
+      ctx.strokeStyle = '#137a3d'; ctx.lineWidth = w*0.045;
+      ctx.beginPath(); ctx.moveTo(x, y-h*0.11); ctx.lineTo(x, y+h*0.11); ctx.stroke();
+      ctx.fillStyle = '#137a3d';
+      ctx.beginPath(); ctx.arc(x, y-h*0.11, w*0.045, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#c21f1f';
+      ctx.beginPath(); ctx.arc(x, y+h*0.11, w*0.03, 0, Math.PI*2); ctx.fill();
+      idx++;
+    }
+  }
+  ctx.fillStyle = '#0b1e63';
+  ctx.font = 'bold ' + Math.floor(h*0.15) + 'px sans-serif';
+  ctx.fillText(String(value), w/2, h*0.88);
+}
+function drawDots(ctx, w, h, value){
+  const layouts = {
+    1:[[0.5,0.5]],
+    2:[[0.3,0.3],[0.7,0.7]],
+    3:[[0.28,0.24],[0.5,0.5],[0.72,0.76]],
+    4:[[0.3,0.28],[0.7,0.28],[0.3,0.72],[0.7,0.72]],
+    5:[[0.3,0.28],[0.7,0.28],[0.5,0.5],[0.3,0.72],[0.7,0.72]],
+    6:[[0.3,0.22],[0.7,0.22],[0.3,0.5],[0.7,0.5],[0.3,0.78],[0.7,0.78]],
+    7:[[0.28,0.2],[0.5,0.35],[0.72,0.2],[0.3,0.5],[0.7,0.5],[0.3,0.8],[0.7,0.8]],
+    8:[[0.3,0.16],[0.7,0.16],[0.3,0.38],[0.7,0.38],[0.3,0.6],[0.7,0.6],[0.3,0.82],[0.7,0.82]],
+    9:[[0.28,0.18],[0.5,0.18],[0.72,0.18],[0.28,0.5],[0.5,0.5],[0.72,0.5],[0.28,0.82],[0.5,0.82],[0.72,0.82]]
+  };
+  const pts = layouts[value] || layouts[1];
+  const colors = ['#1f5fbf','#c21f1f','#137a3d'];
+  pts.forEach((p,i)=>{
+    ctx.fillStyle = colors[i%colors.length];
+    ctx.beginPath();
+    ctx.arc(p[0]*w, p[1]*h, w*0.09, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth=1.5; ctx.stroke();
+  });
+}
+function drawWind(ctx, w, h, value){
+  const map = {E:'東', S:'南', W:'西', N:'北'};
+  ctx.fillStyle = '#0b1e63';
+  ctx.font = 'bold ' + Math.floor(h*0.42) + 'px "Songti SC","SimSun",serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(map[value], w/2, h/2);
+}
+function drawDragon(ctx, w, h, value){
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  if(value==='red'){
+    ctx.fillStyle = '#c21f1f';
+    ctx.font = 'bold ' + Math.floor(h*0.42) + 'px "Songti SC","SimSun",serif';
+    ctx.fillText('中', w/2, h/2);
+  } else if(value==='green'){
+    ctx.fillStyle = '#137a3d';
+    ctx.font = 'bold ' + Math.floor(h*0.42) + 'px "Songti SC","SimSun",serif';
+    ctx.fillText('發', w/2, h/2);
+  } else {
+    ctx.strokeStyle = '#1f5fbf'; ctx.lineWidth = w*0.06;
+    ctx.strokeRect(w*0.18, h*0.14, w*0.64, h*0.72);
+  }
+}
+const frontTextureCache = {};
+function getFrontMaterial(tile){
+  const key = tileKey(tile);
+  if(frontTextureCache[key]) return frontTextureCache[key];
+  const c = makeCanvas(128,178);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#faf6e8'; ctx.fillRect(0,0,c.width,c.height);
+  ctx.strokeStyle = 'rgba(0,0,0,0.08)'; ctx.lineWidth=3;
+  ctx.strokeRect(3,3,c.width-6,c.height-6);
+  if(tile.suit==='characters') drawCharacters(ctx, c.width, c.height, tile.value);
+  else if(tile.suit==='bamboo') drawBamboo(ctx, c.width, c.height, tile.value);
+  else if(tile.suit==='dots') drawDots(ctx, c.width, c.height, tile.value);
+  else if(tile.suit==='wind') drawWind(ctx, c.width, c.height, tile.value);
+  else if(tile.suit==='dragon') drawDragon(ctx, c.width, c.height, tile.value);
+  const tex = new THREE.CanvasTexture(c);
+  const mat = new THREE.MeshStandardMaterial({map: tex, roughness:0.55});
+  frontTextureCache[key] = mat;
+  return mat;
+}
+
+function createTileMesh(tile, faceDown){
+  const front = getFrontMaterial(tile);
+  // BoxGeometry material order: px, nx, py, ny, pz, nz
+  const mats = [edgeMat, edgeMat, front, backMat, edgeMat, edgeMat];
+  const mesh = new THREE.Mesh(sharedGeo, mats);
+  mesh.userData.tile = tile;
+  if(faceDown) mesh.rotation.x = Math.PI;
+  return mesh;
+}
+
+/* ============================= SCENE GROUPS ============================= */
+const handGroups = [new THREE.Group(), new THREE.Group(), new THREE.Group(), new THREE.Group()];
+const meldGroups = [new THREE.Group(), new THREE.Group(), new THREE.Group(), new THREE.Group()];
+const discardGroups = [new THREE.Group(), new THREE.Group(), new THREE.Group(), new THREE.Group()];
+handGroups.forEach(g=>scene.add(g));
+meldGroups.forEach(g=>scene.add(g));
+discardGroups.forEach(g=>scene.add(g));
+
+function clearGroup(g){ while(g.children.length){ g.remove(g.children[0]); } }
+
+// seat orientation config: axis along which hand/discard is spread, and base offset
+const SEAT_CFG = [
+  {axis:'x', handZ: 8.4, meldZ: 9.9, discBaseZ: 3.0, discRowStep:-1.15, sign:1, faceDown:false},
+  {axis:'z', handX: 8.4, meldX: 9.9, discBaseX: 3.0, discRowStep:-1.15, sign:1, faceDown:true},
+  {axis:'x', handZ: -8.4, meldZ: -9.9, discBaseZ: -3.0, discRowStep:1.15, sign:-1, faceDown:true},
+  {axis:'z', handX: -8.4, meldX: -9.9, discBaseX: -3.0, discRowStep:1.15, sign:-1, faceDown:true}
+];
+
+function layoutHand(player){
+  const grp = handGroups[player];
+  clearGroup(grp);
+  const cfg = SEAT_CFG[player];
+  const hand = hands[player].slice();
+  if(player===0){
+    hand.sort((a,b)=>{
+      if(a.suit!==b.suit) return a.suit.localeCompare(b.suit);
+      return (''+a.value).localeCompare(''+b.value, undefined, {numeric:true});
+    });
+  }
+  const n = hand.length;
+  const spacing = 1.0;
+  hand.forEach((tile,i)=>{
+    const mesh = createTileMesh(tile, player!==0);
+    const offset = (i - (n-1)/2)*spacing;
+    if(cfg.axis==='x'){
+      mesh.position.set(offset, TILE_H/2 + 0.02, cfg.handZ);
+    } else {
+      mesh.position.set(cfg.handX, TILE_H/2 + 0.02, offset*cfg.sign);
+    }
+    if(player!==0) mesh.rotation.x = Math.PI;
+    grp.add(mesh);
+  });
+}
+function layoutMelds(player){
+  const grp = meldGroups[player];
+  clearGroup(grp);
+  const cfg = SEAT_CFG[player];
+  const tiles = [];
+  melds[player].forEach(m=> m.forEach(t=>tiles.push(t)));
+  const n = tiles.length;
+  const spacing = 0.85;
+  tiles.forEach((tile,i)=>{
+    const mesh = createTileMesh(tile, false);
+    const offset = (i - (n-1)/2)*spacing;
+    if(cfg.axis==='x'){
+      mesh.position.set(offset, TILE_H/2 + 0.02, cfg.meldZ);
+    } else {
+      mesh.position.set(cfg.meldX, TILE_H/2 + 0.02, offset*cfg.sign);
+    }
+    grp.add(mesh);
+  });
+}
+function getDiscardPosition(player, index){
+  const cfg = SEAT_CFG[player];
+  const perRow = 6;
+  const row = Math.floor(index/perRow);
+  const col = index % perRow;
+  const colOffset = (col - (perRow-1)/2) * 0.95;
+  if(cfg.axis==='x'){
+    return {x: colOffset, y: TILE_H/2+0.015, z: cfg.discBaseZ + row*cfg.discRowStep};
+  } else {
+    return {x: cfg.discBaseX + row*cfg.discRowStep, y: TILE_H/2+0.015, z: colOffset*cfg.sign};
+  }
+}
+function layoutDiscards(player){
+  const grp = discardGroups[player];
+  clearGroup(grp);
+  discards[player].forEach((tile,i)=>{
+    const mesh = createTileMesh(tile, false);
+    const pos = getDiscardPosition(player, i);
+    mesh.position.set(pos.x, pos.y, pos.z);
+    grp.add(mesh);
+  });
+}
+function renderAll(){
+  for(let p=0;p<4;p++){ layoutHand(p); layoutMelds(p); layoutDiscards(p); }
+  document.getElementById('wallCount').textContent = wall.length;
+  document.getElementById('turnName').textContent = SEATS[currentPlayer];
+}
+
+/* ============================= TWEEN SYSTEM ============================= */
+let activeTweens = [];
+function addTween(duration, update, onComplete){
+  activeTweens.push({start: performance.now(), duration, update, onComplete});
+}
+function updateTweens(){
+  if(activeTweens.length===0) return;
+  const now = performance.now();
+  activeTweens = activeTweens.filter(tw=>{
+    const t = Math.min(1, (now - tw.start)/tw.duration);
+    tw.update(t);
+    if(t>=1){ if(tw.onComplete) tw.onComplete(); return false; }
+    return true;
+  });
+}
+function easeOutBack(t){
+  const c1=1.70158, c3=c1+1;
+  return 1 + c3*Math.pow(t-1,3) + c1*Math.pow(t-1,2);
+}
+function easeInOutQuad(t){ return t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2; }
+
+/* ============================= DISCARD SPOTLIGHT ============================= */
+// Pops the discarded tile up large in the center of the table so everyone can
+// clearly see what was thrown, then settles it into the discarder's pile.
+function showDiscardSpotlight(tile, player, index){
+  return new Promise(resolve=>{
+    const mesh = createTileMesh(tile, false);
+    const startScale = 0.5, peakScale = 2.0;
+    mesh.scale.set(startScale, startScale, startScale);
+    mesh.position.set(0, 3.4, 0.3);
+    scene.add(mesh);
+    const targetPos = getDiscardPosition(player, index);
+
+    addTween(260, t=>{
+      const e = easeOutBack(t);
+      const s = startScale + (peakScale-startScale)*e;
+      mesh.scale.set(s,s,s);
+      mesh.position.y = 3.4 - 2.0*t;
+      mesh.rotation.y = t*Math.PI*0.5;
+    }, ()=>{
+      setTimeout(()=>{
+        addTween(340, t=>{
+          const e = easeInOutQuad(t);
+          const s = peakScale + (1-peakScale)*e;
+          mesh.scale.set(s,s,s);
+          mesh.position.x = 0 + (targetPos.x-0)*e;
+          mesh.position.y = 1.4 + (targetPos.y-1.4)*e;
+          mesh.position.z = 0.3 + (targetPos.z-0.3)*e;
+        }, ()=>{
+          scene.remove(mesh);
+          resolve();
+        });
+      }, 700);
+    });
+  });
+}
+
+/* ============================= UI HELPERS ============================= */
+const msgEl = document.getElementById('message');
+function setMessage(text){ msgEl.textContent = text; }
+const actionPanel = document.getElementById('actionPanel');
+function showActions(buttons){
+  actionPanel.innerHTML = '';
+  buttons.forEach(b=>{
+    const btn = document.createElement('button');
+    btn.textContent = b.label;
+    if(b.skip) btn.className = 'skip';
+    btn.onclick = ()=>{ sfxClick(); hideActions(); b.onClick(); };
+    actionPanel.appendChild(btn);
+  });
+  actionPanel.style.display = 'flex';
+}
+function hideActions(){ actionPanel.style.display = 'none'; actionPanel.innerHTML=''; }
+
+function delay(ms){ return new Promise(res=>setTimeout(res, ms)); }
+
+function askHumanDiscard(){
+  setMessage('Your turn — click a tile in your hand to discard.');
+  humanCanDiscardNow = true;
+  return new Promise(resolve=>{ awaitingHumanDiscard = resolve; });
+}
+function askHumanWin(tile, selfDraw){
+  return new Promise(resolve=>{
+    let done = false;
+    const finish = (val)=>{ if(done) return; done=true; hideActions(); resolve(val); };
+    setMessage(selfDraw ? 'You drew the winning tile! Declare Win?' : 'You can WIN on that discard!');
+    showActions([
+      {label:'Win!', onClick:()=>finish(true)},
+      {label:'Skip', skip:true, onClick:()=>finish(false)}
+    ]);
+    setTimeout(()=>finish(false), 6000);
+  });
+}
+function askHumanPung(tile){
+  return new Promise(resolve=>{
+    let done = false;
+    const finish = (val)=>{ if(done) return; done=true; hideActions(); resolve(val); };
+    setMessage('You can PUNG this discard!');
+    showActions([
+      {label:'Pung', onClick:()=>finish(true)},
+      {label:'Skip', skip:true, onClick:()=>finish(false)}
+    ]);
+    setTimeout(()=>finish(false), 5000);
+  });
+}
+
+/* ============================= RAYCAST CLICK ============================= */
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+renderer.domElement.addEventListener('click', (ev)=>{
+  ensureAudio();
+  if(!humanCanDiscardNow || !awaitingHumanDiscard) return;
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((ev.clientX-rect.left)/rect.width)*2-1;
+  pointer.y = -((ev.clientY-rect.top)/rect.height)*2+1;
+  raycaster.setFromCamera(pointer, camera);
+  const intersects = raycaster.intersectObjects(handGroups[0].children);
+  if(intersects.length>0){
+    const tile = intersects[0].object.userData.tile;
+    const resolver = awaitingHumanDiscard;
+    humanCanDiscardNow = false;
+    awaitingHumanDiscard = null;
+    sfxClick();
+    resolver(tile);
+  }
+});
+
+/* ============================= GAME LOGIC ============================= */
+function removeOneTile(arr, suit, value){
+  const idx = arr.findIndex(t=>t.suit===suit && t.value===value);
+  if(idx>=0) return arr.splice(idx,1)[0];
+  return null;
+}
+
+async function checkCalls(discardingPlayer, tile){
+  const order = [];
+  for(let i=1;i<=3;i++) order.push((discardingPlayer+i)%4);
+
+  // Win checks first
+  for(const p of order){
+    const testHand = getFullHand(p).concat([tile]);
+    if(isWinningHand(testHand)){
+      if(p===0){
+        const wants = await askHumanWin(tile, false);
+        if(wants) return {type:'win', by:p};
+      } else {
+        return {type:'win', by:p};
+      }
+    }
+  }
+  // Pung checks
+  for(const p of order){
+    const count = hands[p].filter(t=>t.suit===tile.suit && t.value===tile.value).length;
+    if(count>=2){
+      if(p===0){
+        const wants = await askHumanPung(tile);
+        if(wants) return {type:'pung', by:p};
+      } else {
+        if(Math.random() < 0.65) return {type:'pung', by:p};
+      }
+    }
+  }
+  return null;
+}
+
+async function performDiscard(player){
+  let tile;
+  if(player===0){
+    tile = await askHumanDiscard();
+  } else {
+    await delay(700);
+    tile = chooseAIDiscard(hands[player]);
+  }
+  removeOneTile(hands[player], tile.suit, tile.value);
+  layoutHand(player);
+  sfxDiscard();
+  const targetIndex = discards[player].length;
+  discards[player].push(tile);
+  setMessage(SEATS[player] + ' discarded ' + describeTile(tile) + '.');
+  await showDiscardSpotlight(tile, player, targetIndex);
+  layoutDiscards(player);
+  return tile;
+}
+
+function describeTile(tile){
+  const names = {characters:'Characters', bamboo:'Bamboo', dots:'Dots'};
+  if(NUM_SUITS.includes(tile.suit)) return tile.value + ' ' + names[tile.suit];
+  if(tile.suit==='wind') return {E:'East',S:'South',W:'West',N:'North'}[tile.value] + ' Wind';
+  if(tile.suit==='dragon') return tile.value.charAt(0).toUpperCase()+tile.value.slice(1) + ' Dragon';
+  return '';
+}
+
+function applyPung(caller, tile){
+  let removed = 0;
+  hands[caller] = hands[caller].filter(t=>{
+    if(removed<2 && t.suit===tile.suit && t.value===tile.value){ removed++; return false; }
+    return true;
+  });
+  melds[caller].push([{...tile}, {...tile}, {...tile}]);
+  sfxPung();
+  renderAll();
+  setMessage(SEATS[caller] + ' called PUNG on ' + describeTile(tile) + '!');
+}
+
+async function handleTurn(player){
+  if(wall.length===0){
+    endGame(null, 'draw');
+    return null;
+  }
+  const tile = wall.pop();
+  hands[player].push(tile);
+  sfxDraw();
+  renderAll();
+  setMessage(SEATS[player] + ' drew a tile. (' + wall.length + ' left in wall)');
+  await delay(player===0?200:500);
+
+  const fullHand = getFullHand(player);
+  if(isWinningHand(fullHand)){
+    if(player===0){
+      const wants = await askHumanWin(tile, true);
+      if(wants){ endGame(player, 'self-draw'); return null; }
+    } else {
+      endGame(player, 'self-draw');
+      return null;
+    }
+  }
+
+  const discardedTile = await performDiscard(player);
+  if(!gameRunning) return null;
+
+  const call = await checkCalls(player, discardedTile);
+  if(!gameRunning) return null;
+
+  if(call && call.type==='win'){
+    // remove tile from discarder's pile (it's claimed)
+    discards[player].pop();
+    hands[call.by].push(discardedTile);
+    endGame(call.by, 'discard-win', player);
+    return null;
+  }
+  if(call && call.type==='pung'){
+    discards[player].pop();
+    renderAll();
+    applyPung(call.by, discardedTile);
+    await delay(400);
+    const secondDiscard = await performDiscard(call.by);
+    if(!gameRunning) return null;
+    // single extra check for a win off this forced discard (no further pung chaining, beginner simplification)
+    const order2 = [];
+    for(let i=1;i<=3;i++) order2.push((call.by+i)%4);
+    for(const p of order2){
+      const testHand = getFullHand(p).concat([secondDiscard]);
+      if(isWinningHand(testHand)){
+        if(p===0){
+          const wants = await askHumanWin(secondDiscard, false);
+          if(wants){
+            discards[call.by].pop();
+            hands[p].push(secondDiscard);
+            endGame(p, 'discard-win', call.by);
+            return null;
+          }
+        } else {
+          discards[call.by].pop();
+          hands[p].push(secondDiscard);
+          endGame(p, 'discard-win', call.by);
+          return null;
+        }
+      }
+    }
+    return (call.by+1)%4;
+  }
+  return (player+1)%4;
+}
+
+async function mainLoop(){
+  gameRunning = true;
+  let current = 0;
+  while(gameRunning){
+    currentPlayer = current;
+    renderAll();
+    const next = await handleTurn(current);
+    if(next===null) break;
+    current = next;
+  }
+}
+
+function endGame(winner, type, robbedFrom){
+  gameRunning = false;
+  hideActions();
+  humanCanDiscardNow = false;
+  const overlay = document.getElementById('endOverlay');
+  const title = document.getElementById('endTitle');
+  const desc = document.getElementById('endDesc');
+  if(type==='draw'){
+    title.textContent = 'Wall Exhausted';
+    desc.textContent = 'No one completed a hand this round. It\'s a draw!';
+    playTone(220,0.4,'sine',0.06);
+  } else {
+    sfxWin();
+    title.textContent = (winner===0 ? 'You Win!' : SEATS[winner] + ' Wins!');
+    if(type==='self-draw'){
+      desc.textContent = SEATS[winner] + ' completed a winning hand by self-draw!';
+    } else {
+      desc.textContent = SEATS[winner] + ' won by claiming ' + SEATS[robbedFrom] + '\'s discard!';
+    }
+    renderAll();
+  }
+  overlay.style.display = 'flex';
+}
+
+/* ============================= NEW GAME ============================= */
+function newGame(){
+  ensureAudio();
+  hideActions();
+  document.getElementById('endOverlay').style.display = 'none';
+  wall = shuffle(buildWall());
+  hands = [[],[],[],[]];
+  melds = [[],[],[],[]];
+  discards = [[],[],[],[]];
+  for(let round=0; round<13; round++){
+    for(let p=0;p<4;p++){ hands[p].push(wall.pop()); }
+  }
+  currentPlayer = 0;
+  renderAll();
+  setMessage('New game started. You go first!');
+  mainLoop();
+}
+
+/* ============================= WIRING ============================= */
+document.getElementById('newGameBtn').onclick = ()=>{ ensureAudio(); newGame(); };
+document.getElementById('playAgainBtn').onclick = ()=>{ newGame(); };
+document.getElementById('helpBtn').onclick = ()=>{ document.getElementById('helpOverlay').style.display='flex'; };
+document.getElementById('closeHelp').onclick = ()=>{ document.getElementById('helpOverlay').style.display='none'; };
+window.addEventListener('resize', resize);
+resize();
+
+/* ============================= RENDER LOOP ============================= */
+function animate(){
+  requestAnimationFrame(animate);
+  updateTweens();
+  renderer.render(scene, camera);
+}
+animate();
+renderAll();
+
+})();
+</script>
+</body>
+</html>
