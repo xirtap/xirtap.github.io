@@ -332,6 +332,7 @@ function getFullHand(p){
 }
 
 /* ============================= THREE.JS SETUP ============================= */
+const TILE_W = 0.9, TILE_H = 0.55, TILE_D = 1.25;
 const canvas = document.getElementById('gameCanvas');
 const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
@@ -340,26 +341,39 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b1210);
 scene.fog = new THREE.Fog(0x0b1210, 22, 42);
 
-const camera = new THREE.PerspectiveCamera(58, window.innerWidth/window.innerHeight, 0.1, 300);
-const BASE_CAM_POS = new THREE.Vector3(0, 11, 11.75);
-const BASE_LOOKAT = new THREE.Vector3(0, 0, 3.5);
-const BASE_ASPECT = 16/9;
-const ZOOM_CAP = 4.0;
+const CAM_FOV = 55;
+const camera = new THREE.PerspectiveCamera(CAM_FOV, window.innerWidth/window.innerHeight, 0.1, 300);
 
-// On narrow (portrait/mobile) screens, the horizontal field of view shrinks and
-// the left/right seats fall outside the frame. Zooming the camera back along its
-// view direction compresses all angular extents so every seat stays visible,
-// regardless of aspect ratio. The fog distances must scale with this zoom too,
-// otherwise the table ends up beyond the fog's far distance and gets washed out
-// to the background color (looking like a black/empty screen on phones).
+// Fixed viewing tilt (elevation angle below horizontal) and look-at target —
+// chosen to give a natural top-down mahjong-table angle.
+const CAM_ELEV_DEG = 32.5;
+const CAM_LOOKAT = new THREE.Vector3(0, 0, 4.0);
+const CAM_ELEV_RAD = CAM_ELEV_DEG * Math.PI / 180;
+const CAM_DIR = new THREE.Vector3(0, Math.sin(CAM_ELEV_RAD), Math.cos(CAM_ELEV_RAD)); // points from lookAt toward camera
+
+// The player's hand row sits at z = HAND_ROW_DIST on the table. We want the
+// screen, at that exact depth, to always span TARGET_TILES_WIDE tile-widths —
+// regardless of the device's aspect ratio — so the player's tiles never look
+// too small on any screen. This is solved exactly (not approximated) from the
+// perspective projection: at depth t along the view axis, the visible half-width
+// is t*tan(vFov/2)*aspect. Setting that equal to half our target width gives the
+// required depth, and the camera distance follows from the fixed viewing angle.
+const HAND_ROW_DIST = 8.1;
+const TARGET_TILES_WIDE = 16;
+const TILE_PITCH = 1.0; // matches the hand's tile-to-tile spacing
+const HALF_TARGET_WIDTH = (TARGET_TILES_WIDE * TILE_PITCH) / 2;
+const CAM_VFOV_HALF_RAD = (CAM_FOV / 2) * Math.PI / 180;
+const HAND_ROW_POINT = new THREE.Vector3(0, TILE_H/2, HAND_ROW_DIST);
+const CAM_K = HAND_ROW_POINT.clone().sub(CAM_LOOKAT).dot(CAM_DIR);
+// Floor distance so extremely wide (ultrawide monitor) aspect ratios don't zoom
+// in so close that the player's own exposed-meld row gets pushed off-screen.
+const CAM_MIN_DIST = 10.8;
+
 function updateCameraForAspect(aspect){
-  let zoomFactor = 1;
-  if(aspect < BASE_ASPECT){
-    zoomFactor = Math.min(BASE_ASPECT/aspect, ZOOM_CAP);
-  }
-  const dir = BASE_CAM_POS.clone().sub(BASE_LOOKAT).multiplyScalar(zoomFactor);
-  camera.position.copy(BASE_LOOKAT).add(dir);
-  camera.lookAt(BASE_LOOKAT);
+  const requiredDepth = HALF_TARGET_WIDTH / (Math.tan(CAM_VFOV_HALF_RAD) * aspect);
+  const distance = Math.max(CAM_MIN_DIST, requiredDepth + CAM_K);
+  camera.position.copy(CAM_LOOKAT).add(CAM_DIR.clone().multiplyScalar(distance));
+  camera.lookAt(CAM_LOOKAT);
   const distToTable = camera.position.length();
   scene.fog.near = Math.max(1, distToTable - 1);
   scene.fog.far = distToTable + 19;
@@ -399,7 +413,6 @@ table.position.y = -0.28;
 scene.add(table);
 
 /* ============================= TILE MESHES ============================= */
-const TILE_W = 0.9, TILE_H = 0.55, TILE_D = 1.25;
 const sharedGeo = new THREE.BoxGeometry(TILE_W, TILE_H, TILE_D);
 const sideColor = 0xf2ecd8;
 const sideMat = new THREE.MeshStandardMaterial({color: sideColor, roughness:0.7});
