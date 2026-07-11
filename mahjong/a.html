@@ -133,11 +133,17 @@
   <div class="box">
     <h2>How to Play (Beginner Mode)</h2>
     <p><b>Goal:</b> Be the first to complete a hand of 4 sets + 1 pair (14 tiles total).</p>
-    <p><b>Sets</b> are either three identical tiles (triplet) or three consecutive numbers of the same suit (sequence — sequences only count for Characters, Bamboo, and Dots). Winds and Dragons can only form triplets.</p>
+    <p><b>Sets</b> are either three identical tiles (triplet), four identical tiles (Gong), or three consecutive numbers of the same suit (Chow — sequences only count for Characters, Bamboo, and Dots). Winds and Dragons can only form triplets/Gongs, never Chows.</p>
     <p><b>Your turn:</b> A tile is drawn automatically for you. Click a tile in your hand (bottom row) to discard it.</p>
-    <p><b>Calling tiles:</b> When any player discards a tile you need, you may be offered <b>Pung</b> (claim it to complete a triplet from a matching pair in your hand) or <b>Win</b> (claim it to complete your winning hand). Buttons appear when available — respond quickly or it will be skipped!</p>
+    <p><b>Calling tiles:</b> When any player discards a tile you need, you may be offered:</p>
+    <p>&nbsp;&nbsp;• <b>Win</b> — claim it to complete your winning hand<br>
+    &nbsp;&nbsp;• <b>Gong</b> — claim it if you already hold three matching tiles<br>
+    &nbsp;&nbsp;• <b>Pung</b> — claim it if you hold a matching pair<br>
+    &nbsp;&nbsp;• <b>Chow</b> — claim it to form a sequence, but only if you're the very next player after the discarder (this matches real Hong Kong Mahjong rules)</p>
+    <p>Buttons appear when available — respond quickly or it will be skipped! Win beats Gong, which beats Pung, which beats Chow.</p>
     <p><b>Self-draw win:</b> If the tile you draw completes your hand, you'll be offered the Win button immediately.</p>
-    <p>This simplified beginner mode skips Chow (sequence calls), Kong, flowers, and detailed fan scoring — first valid hand simply wins the round.</p>
+    <p><b>Declaring your own Gong:</b> If the tile you just drew gives you four-of-a-kind in hand, or matches an existing Pung you've already shown, you'll be offered a Gong button. Declaring Gong draws you a replacement tile from the wall before you discard.</p>
+    <p>This simplified beginner mode skips flowers and detailed fan scoring — first valid hand simply wins the round.</p>
     <button id="closeHelp">Got it</button>
   </div>
 </div>
@@ -198,6 +204,7 @@ function sfxDiscard(){
   playTone(150, 0.05, 'square', 0.05);
 }
 function sfxPung(){ playTone(200,0.08,'sawtooth',0.07); setTimeout(()=>playTone(260,0.12,'sawtooth',0.07),80); }
+function sfxChow(){ playTone(420,0.08,'sine',0.06); setTimeout(()=>playTone(520,0.1,'sine',0.06),90); }
 function sfxKong(){
   // deeper resonant "gong" chime — ready for Kong calls
   if(!audioCtx) return;
@@ -290,6 +297,19 @@ function isWinningHand(tiles){
 }
 
 /* ============================= AI HEURISTIC ============================= */
+// Given a discarded tile, returns an array of "Chow options" — each option is
+// the pair of tile values (from the hand) that would combine with the discard
+// to complete a run. Only number suits can form runs.
+function getChowOptions(hand, tile){
+  if(!NUM_SUITS.includes(tile.suit)) return [];
+  const v = tile.value;
+  const has = (val)=> hand.some(t=>t.suit===tile.suit && t.value===val);
+  const options = [];
+  if(v-2>=1 && has(v-2) && has(v-1)) options.push([v-2, v-1]);
+  if(v-1>=1 && v+1<=9 && has(v-1) && has(v+1)) options.push([v-1, v+1]);
+  if(v+1<=9 && v+2<=9 && has(v+1) && has(v+2)) options.push([v+1, v+2]);
+  return options;
+}
 function scoreTileUsefulness(tile, hand){
   let score = 0;
   const sameCount = hand.filter(t=>t.suit===tile.suit && t.value===tile.value).length;
@@ -318,16 +338,19 @@ function chooseAIDiscard(hand){
 const SEATS = ['You','East AI','North AI','West AI']; // seat 0 = human
 let wall = [];
 let hands = [[],[],[],[]];
-let melds = [[],[],[],[]]; // arrays of triplet arrays [t,t,t]
+let melds = [[],[],[],[]]; // arrays of meld objects: {type:'pung'|'kong'|'concealedKong'|'chow', tiles:[...]}
 let discards = [[],[],[],[]];
 let currentPlayer = 0;
 let gameRunning = false;
 let awaitingHumanDiscard = null; // resolver function
 let humanCanDiscardNow = false;
 
+// For win-checking, a meld always counts as exactly one set of 3 tiles — even
+// a Kong, which is visually 4 tiles but functions as a single triplet-equivalent
+// set (the player draws a compensating replacement tile when they declare it).
 function getFullHand(p){
   let full = hands[p].slice();
-  melds[p].forEach(m=> full = full.concat(m));
+  melds[p].forEach(m => full = full.concat(m.tiles.slice(0,3)));
   return full;
 }
 
@@ -595,11 +618,18 @@ function layoutMelds(player){
   clearGroup(grp);
   const cfg = SEAT_CFG[player];
   const tiles = [];
-  melds[player].forEach(m=> m.forEach(t=>tiles.push(t)));
+  melds[player].forEach(m=>{
+    m.tiles.forEach(t=>{
+      // Concealed kongs are genuinely hidden from opponents — only the owner
+      // (and the camera showing player 0's own melds) can see the tile faces.
+      const hidden = (m.type === 'concealedKong' && player !== 0);
+      tiles.push({tile:t, hidden});
+    });
+  });
   const n = tiles.length;
   const spacing = 0.85;
-  tiles.forEach((tile,i)=>{
-    const mesh = createTileMesh(tile, false);
+  tiles.forEach((entry,i)=>{
+    const mesh = createTileMesh(entry.tile, entry.hidden);
     const offset = (i - (n-1)/2)*spacing;
     if(cfg.axis==='x'){
       mesh.position.set(offset, TILE_H/2 + 0.02, cfg.meldZ);
@@ -742,6 +772,44 @@ function askHumanPung(tile){
     setTimeout(()=>finish(false), 5000);
   });
 }
+function askHumanGongCall(tile){
+  return new Promise(resolve=>{
+    let done = false;
+    const finish = (val)=>{ if(done) return; done=true; hideActions(); resolve(val); };
+    setMessage('You can GONG this discard!');
+    showActions([
+      {label:'Gong', onClick:()=>finish(true)},
+      {label:'Skip', skip:true, onClick:()=>finish(false)}
+    ]);
+    setTimeout(()=>finish(false), 5000);
+  });
+}
+function askHumanChow(tile, options){
+  return new Promise(resolve=>{
+    let done = false;
+    const finish = (val)=>{ if(done) return; done=true; hideActions(); resolve(val); };
+    setMessage('You can CHOW this discard!');
+    const buttons = options.map(opt=>{
+      const sorted = [...opt, tile.value].sort((a,b)=>a-b);
+      return {label:'Chow ' + sorted.join('-'), onClick:()=>finish(opt)};
+    });
+    buttons.push({label:'Skip', skip:true, onClick:()=>finish(null)});
+    showActions(buttons);
+    setTimeout(()=>finish(null), 6000);
+  });
+}
+function askHumanSelfKong(kind){
+  return new Promise(resolve=>{
+    let done = false;
+    const finish = (val)=>{ if(done) return; done=true; hideActions(); resolve(val); };
+    setMessage(kind==='added' ? 'Upgrade your Pung to a GONG?' : 'You have four of a kind! Declare a concealed GONG?');
+    showActions([
+      {label:'Gong', onClick:()=>finish(true)},
+      {label:'Skip', skip:true, onClick:()=>finish(false)}
+    ]);
+    setTimeout(()=>finish(false), 6000);
+  });
+}
 
 /* ============================= TILE TAP HANDLING (mouse + touch) ============================= */
 const raycaster = new THREE.Raycaster();
@@ -789,7 +857,7 @@ async function checkCalls(discardingPlayer, tile){
   const order = [];
   for(let i=1;i<=3;i++) order.push((discardingPlayer+i)%4);
 
-  // Win checks first
+  // Win checks first — highest priority
   for(const p of order){
     const testHand = getFullHand(p).concat([tile]);
     if(isWinningHand(testHand)){
@@ -798,6 +866,18 @@ async function checkCalls(discardingPlayer, tile){
         if(wants) return {type:'win', by:p};
       } else {
         return {type:'win', by:p};
+      }
+    }
+  }
+  // Gong (exposed Kong) checks — any player with 3 matching tiles in hand
+  for(const p of order){
+    const count = hands[p].filter(t=>t.suit===tile.suit && t.value===tile.value).length;
+    if(count>=3){
+      if(p===0){
+        const wants = await askHumanGongCall(tile);
+        if(wants) return {type:'kong', by:p};
+      } else {
+        if(Math.random() < 0.8) return {type:'kong', by:p};
       }
     }
   }
@@ -810,6 +890,20 @@ async function checkCalls(discardingPlayer, tile){
         if(wants) return {type:'pung', by:p};
       } else {
         if(Math.random() < 0.65) return {type:'pung', by:p};
+      }
+    }
+  }
+  // Chow checks — only the player immediately after the discarder may call Chow
+  const nextPlayer = (discardingPlayer+1)%4;
+  const chowOptions = getChowOptions(hands[nextPlayer], tile);
+  if(chowOptions.length>0){
+    if(nextPlayer===0){
+      const chosen = await askHumanChow(tile, chowOptions);
+      if(chosen) return {type:'chow', by:nextPlayer, option:chosen};
+    } else {
+      if(Math.random() < 0.5){
+        const chosen = chowOptions[Math.floor(Math.random()*chowOptions.length)];
+        return {type:'chow', by:nextPlayer, option:chosen};
       }
     }
   }
@@ -849,10 +943,103 @@ function applyPung(caller, tile){
     if(removed<2 && t.suit===tile.suit && t.value===tile.value){ removed++; return false; }
     return true;
   });
-  melds[caller].push([{...tile}, {...tile}, {...tile}]);
+  melds[caller].push({type:'pung', tiles:[{...tile}, {...tile}, {...tile}]});
   sfxPung();
   renderAll();
   setMessage(SEATS[caller] + ' called PUNG on ' + describeTile(tile) + '!');
+}
+
+function applyKongFromDiscard(caller, tile){
+  let removed = 0;
+  hands[caller] = hands[caller].filter(t=>{
+    if(removed<3 && t.suit===tile.suit && t.value===tile.value){ removed++; return false; }
+    return true;
+  });
+  melds[caller].push({type:'kong', tiles:[{...tile}, {...tile}, {...tile}, {...tile}]});
+  sfxKong();
+  renderAll();
+  setMessage(SEATS[caller] + ' called GONG on ' + describeTile(tile) + '!');
+}
+
+function applyChow(caller, tile, option){
+  const chowTiles = [{...tile}];
+  option.forEach(v=>{
+    const removed = removeOneTile(hands[caller], tile.suit, v);
+    chowTiles.push(removed || {suit:tile.suit, value:v});
+  });
+  chowTiles.sort((a,b)=>a.value-b.value);
+  melds[caller].push({type:'chow', tiles: chowTiles});
+  sfxChow();
+  renderAll();
+  const sortedVals = chowTiles.map(t=>t.value).join('-');
+  setMessage(SEATS[caller] + ' called CHOW (' + sortedVals + ') using ' + describeTile(tile) + '!');
+}
+
+// Offers a self-declared Gong using the tile the player just drew — either an
+// "added kong" (upgrading an existing exposed Pung) or a "concealed kong"
+// (four matching tiles all still in hand). Returns true if a kong was declared.
+async function offerSelfKong(player, tile){
+  const addedPungMeld = melds[player].find(m=>
+    m.type==='pung' && m.tiles[0].suit===tile.suit && m.tiles[0].value===tile.value
+  );
+  if(addedPungMeld){
+    let wants;
+    if(player===0){ wants = await askHumanSelfKong('added'); }
+    else { wants = Math.random() < 0.85; }
+    if(!wants) return false;
+    removeOneTile(hands[player], tile.suit, tile.value);
+    addedPungMeld.type = 'kong';
+    addedPungMeld.tiles.push({...tile});
+    sfxKong();
+    renderAll();
+    setMessage(SEATS[player] + ' upgraded to GONG with ' + describeTile(tile) + '!');
+    return true;
+  }
+  const countInHand = hands[player].filter(t=>t.suit===tile.suit && t.value===tile.value).length;
+  if(countInHand>=4){
+    let wants;
+    if(player===0){ wants = await askHumanSelfKong('concealed'); }
+    else { wants = Math.random() < 0.8; }
+    if(!wants) return false;
+    let removed = 0;
+    hands[player] = hands[player].filter(t=>{
+      if(removed<4 && t.suit===tile.suit && t.value===tile.value){ removed++; return false; }
+      return true;
+    });
+    melds[player].push({type:'concealedKong', tiles:[{...tile},{...tile},{...tile},{...tile}]});
+    sfxKong();
+    renderAll();
+    setMessage(SEATS[player] + ' declared a concealed GONG!');
+    return true;
+  }
+  return false;
+}
+
+// Draws a replacement tile for a player who just declared a Kong (self or via
+// discard claim), and checks whether that replacement completes their hand.
+// Returns true if the game ended as a result (win or wall exhausted).
+async function drawKongReplacement(player){
+  if(wall.length===0){
+    endGame(null, 'draw');
+    return true;
+  }
+  const replacement = wall.pop();
+  hands[player].push(replacement);
+  sfxDraw();
+  renderAll();
+  setMessage(SEATS[player] + ' draws a replacement tile after GONG.');
+  await delay(player===0 ? 300 : 500);
+  const replacementHand = getFullHand(player);
+  if(isWinningHand(replacementHand)){
+    if(player===0){
+      const wants = await askHumanWin(replacement, true);
+      if(wants){ endGame(player, 'self-draw'); return true; }
+    } else {
+      endGame(player, 'self-draw');
+      return true;
+    }
+  }
+  return false;
 }
 
 async function handleTurn(player){
@@ -878,6 +1065,15 @@ async function handleTurn(player){
     }
   }
 
+  // Offer a self-declared Gong (added kong or concealed kong) using the tile
+  // just drawn. If declared, draw a replacement tile and re-check for a win.
+  const kongDeclared = await offerSelfKong(player, tile);
+  if(!gameRunning) return null;
+  if(kongDeclared){
+    const ended = await drawKongReplacement(player);
+    if(ended || !gameRunning) return null;
+  }
+
   const discardedTile = await performDiscard(player);
   if(!gameRunning) return null;
 
@@ -891,14 +1087,22 @@ async function handleTurn(player){
     endGame(call.by, 'discard-win', player);
     return null;
   }
-  if(call && call.type==='pung'){
+  if(call && (call.type==='pung' || call.type==='kong' || call.type==='chow')){
     discards[player].pop();
     renderAll();
-    applyPung(call.by, discardedTile);
+    if(call.type==='pung') applyPung(call.by, discardedTile);
+    else if(call.type==='kong') applyKongFromDiscard(call.by, discardedTile);
+    else if(call.type==='chow') applyChow(call.by, discardedTile, call.option);
+
+    if(call.type==='kong'){
+      const ended = await drawKongReplacement(call.by);
+      if(ended || !gameRunning) return null;
+    }
+
     await delay(400);
     const secondDiscard = await performDiscard(call.by);
     if(!gameRunning) return null;
-    // single extra check for a win off this forced discard (no further pung chaining, beginner simplification)
+    // single extra check for a win off this forced discard (no further call chaining, beginner simplification)
     const order2 = [];
     for(let i=1;i<=3;i++) order2.push((call.by+i)%4);
     for(const p of order2){
