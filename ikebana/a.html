@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Ikebana Composer</title>
+  <style>
+    :root {
+      --bg-color: #f4f1ea;
+      --panel-bg: #ffffff;
+      --accent: #5a7052;
+      --accent-hover: #45563f;
+      --text: #2c2c2c;
+      --border: #e0dad0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background-color: var(--bg-color);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      padding: 1rem 2rem;
+      background-color: var(--panel-bg);
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      letter-spacing: 2px;
+      font-weight: normal;
+      color: var(--accent);
+    }
+
+    .app-container {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 60px);
+    }
+
+    /* Sidebar Palette */
+    .sidebar {
+      width: 320px;
+      background: var(--panel-bg);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .sidebar h2 {
+      font-size: 1.1rem;
+      font-weight: normal;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      color: #666;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .selectable-card {
+      background: #faf8f5;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .selectable-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+
+    .selectable-card.active-vase {
+      border-color: var(--accent);
+      background-color: #f0f4ee;
+    }
+
+    .selectable-card svg {
+      width: 70px;
+      height: 80px;
+    }
+
+    .selectable-card span {
+      font-size: 0.8rem;
+      margin-top: 6px;
+      color: #555;
+      text-align: center;
+    }
+
+    /* Main Workspace */
+    .workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    .canvas-container {
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+    }
+
+    /* Placed Canvas Objects (Flowers & Vase) */
+    .canvas-element {
+      position: absolute;
+      cursor: move;
+      transform-origin: center center;
+      user-select: none;
+    }
+
+    .canvas-element.selected {
+      outline: 2px dashed var(--accent);
+      outline-offset: 4px;
+    }
+
+    /* Floating Toolbar */
+    .toolbar {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+    }
+
+    .tool-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .tool-group label {
+      font-size: 0.75rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tool-group input[type="range"] {
+      width: 130px;
+      accent-color: var(--accent);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    button {
+      background: #f0eae1;
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--text);
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: var(--border);
+    }
+
+    button.danger {
+      color: #a33;
+      border-color: #fcc;
+    }
+
+    button.danger:hover {
+      background: #fdd;
+    }
+
+    .hint {
+      position: absolute;
+      bottom: 15px;
+      left: 20px;
+      font-size: 0.8rem;
+      color: #888;
+      font-style: italic;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>生け花 — DIGITAL IKEBANA COMPOSER</h1>
+  </header>
+
+  <div class="app-container">
+    <!-- Sidebar / Selection Palette -->
+    <div class="sidebar">
+      <div>
+        <h2>1. Choose Vase</h2>
+        <div class="grid-layout" id="vase-grid" style="margin-top: 10px;"></div>
+      </div>
+      <div>
+        <h2>2. Add Flowers</h2>
+        <div class="grid-layout" id="flower-grid" style="margin-top: 10px;"></div>
+      </div>
+    </div>
+
+    <!-- Main Arrangement Canvas -->
+    <div class="workspace">
+      <div class="canvas-container" id="canvas">
+        
+        <!-- Controls Toolbar -->
+        <div class="toolbar" id="toolbar">
+          <div class="tool-group">
+            <label>Rotate</label>
+            <input type="range" id="rotate-slider" min="0" max="360" value="0" disabled>
+          </div>
+          <div class="tool-group">
+            <label>Scale</label>
+            <input type="range" id="scale-slider" min="0.3" max="3.0" step="0.1" value="1" disabled>
+          </div>
+          <div class="tool-group">
+            <label>Layering</label>
+            <div class="btn-group">
+              <button id="btn-forward" disabled>Forward</button>
+              <button id="btn-backward" disabled>Backward</button>
+            </div>
+          </div>
+          <hr style="border: 0; border-top: 1px solid var(--border);">
+          <div class="btn-group">
+            <button id="btn-delete" class="danger" disabled>Delete</button>
+            <button id="btn-clear">Clear All</button>
+          </div>
+        </div>
+
+        <span class="hint">Click or drag elements onto canvas. The vase can also be clicked and repositioned!</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Vase Definitions
+    const VASES = [
+      {
+        id: 'classic-tall',
+        name: 'Classic Ceramic',
+        width: 200,
+        height: 240,
+        svg: `<svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none">
+          <path d="M 20 20 C 20 60, 15 90, 50 90 C 85 90, 80 60, 80 20 Z" fill="#d9d2c5" stroke="#b0a898" stroke-width="2"/>
+          <ellipse cx="50" cy="20" rx="30" ry="6" fill="#bfb7a8" stroke="#b0a898" stroke-width="2"/>
+          <ellipse cx="50" cy="20" rx="26" ry="4" fill="#3a3632"/>
+        </svg>`
+      },
+      {
+        id: 'wide-bowl',
+        name: 'Wide Ceramic Bowl',
+        width: 320,
+        height: 140,
+        svg: `<svg viewBox="0 0 120 60" width="100%" height="100%" preserveAspectRatio="none">
+          <path d="M 10 10 C 15 50, 105 50, 110 10 Z" fill="#4a555c" stroke="#333d42" stroke-width="2"/>
+          <ellipse cx="60" cy="10" rx="50" ry="7" fill="#606d75" stroke="#333d42" stroke-width="2"/>
+          <ellipse cx="60" cy="10" rx="46" ry="5" fill="#242b2e"/>
+        </svg>`
+      },
+      {
+        id: 'moribana-dish',
+        name: 'Flat Moribana Dish',
+        width: 380,
+        height: 90,
+        svg: `<svg viewBox="0 0 140 30" width="100%" height="100%" preserveAspectRatio="none">
+          <path d="M 5 5 L 15 25 L 125 25 L 135 5 Z" fill="#2c2c2c" stroke="#1a1a1a" stroke-width="1.5"/>
+          <ellipse cx="70" cy="5" rx="65" ry="4" fill="#404040" stroke="#1a1a1a" stroke-width="1.5"/>
+          <ellipse cx="70" cy="5" rx="62" ry="3" fill="#181818"/>
+        </svg>`
+      },
+      {
+        id: 'tall-cylinder',
+        name: 'Modern Cylinder',
+        width: 130,
+        height: 280,
+        svg: `<svg viewBox="0 0 60 120" width="100%" height="100%" preserveAspectRatio="none">
+          <rect x="10" y="15" width="40" height="95" rx="2" fill="#e8e1d7" stroke="#c2b8aa" stroke-width="2"/>
+          <ellipse cx="30" cy="15" rx="20" ry="5" fill="#d1c7b8" stroke="#c2b8aa" stroke-width="2"/>
+          <ellipse cx="30" cy="15" rx="17" ry="3.5" fill="#423e38"/>
+        </svg>`
+      }
+    ];
+
+    // Flower Definitions
+    const FLOWERS = [
+      {
+        id: 'orchid',
+        name: 'Orchid',
+        svg: `<svg viewBox="0 0 80 100" width="100%" height="100%">
+          <path d="M 40 90 Q 30 50 45 20" stroke="#8a9a86" stroke-width="2" fill="none"/>
+          <g transform="translate(45,20)">
+            <ellipse cx="0" cy="0" rx="10" ry="6" fill="#c39bd3" opacity="0.8"/>
+            <ellipse cx="-6" cy="-4" rx="8" ry="5" fill="#d7bde2" opacity="0.8"/>
+            <ellipse cx="6" cy="-4" rx="8" ry="5" fill="#d7bde2" opacity="0.8"/>
+            <circle cx="0" cy="0" r="3" fill="#884ea0"/>
+          </g>
+          <g transform="translate(38,35)">
+            <ellipse cx="0" cy="0" rx="9" ry="5" fill="#c39bd3" opacity="0.8"/>
+            <ellipse cx="-5" cy="-3" rx="7" ry="4" fill="#d7bde2" opacity="0.8"/>
+            <ellipse cx="5" cy="-3" rx="7" ry="4" fill="#d7bde2" opacity="0.8"/>
+            <circle cx="0" cy="0" r="2.5" fill="#884ea0"/>
+          </g>
+          <g transform="translate(34,52)">
+            <ellipse cx="0" cy="0" rx="8" ry="4" fill="#c39bd3" opacity="0.8"/>
+            <circle cx="0" cy="0" r="2" fill="#884ea0"/>
+          </g>
+        </svg>`
+      },
+      {
+        id: 'calla-lily',
+        name: 'Calla Lily',
+        svg: `<svg viewBox="0 0 80 100" width="100%" height="100%">
+          <path d="M 40 90 Q 42 60 40 25" stroke="#7d8c79" stroke-width="2.5" fill="none"/>
+          <path d="M 40 25 C 25 15, 30 0, 40 5 C 50 0, 55 15, 40 25 Z" fill="#fdfefe" stroke="#e5e8e8"/>
+          <path d="M 40 22 C 32 18, 35 8, 40 10 C 45 8, 48 18, 40 22 Z" fill="#f4f6f6"/>
+          <path d="M 40 20 L 40 10" stroke="#f4d03f" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'pink-calla',
+        name: 'Pink Calla Lily',
+        svg: `<svg viewBox="0 0 80 100" width="100%" height="100%">
+          <path d="M 40 90 Q 38 60 40 25" stroke="#7d8c79" stroke-width="2.5" fill="none"/>
+          <path d="M 40 25 C 22 15, 28 -2, 40 5 C 52 -2, 58 15, 40 25 Z" fill="#f1948a" stroke="#e6b0aa"/>
+          <path d="M 40 22 C 30 15, 33 5, 40 8 C 47 5, 50 15, 40 22 Z" fill="#f5b7b1"/>
+          <path d="M 40 20 L 40 9" stroke="#f4d03f" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'carnation',
+        name: 'Carnation',
+        svg: `<svg viewBox="0 0 80 100" width="100%" height="100%">
+          <path d="M 40 90 Q 39 60 40 35" stroke="#7d8c79" stroke-width="2" fill="none"/>
+          <path d="M 36 35 L 44 35 L 42 42 L 38 42 Z" fill="#7d8c79"/>
+          <g transform="translate(40,25)">
+            <circle cx="0" cy="0" r="16" fill="#f78fb3"/>
+            <circle cx="-5" cy="-3" r="10" fill="#ffb8b8"/>
+            <circle cx="5" cy="-2" r="9" fill="#ffb8b8"/>
+            <circle cx="0" cy="-6" r="8" fill="#f78fb3"/>
+            <path d="M -12 -2 Q 0 -15 12 -2 Q 0 5 -12 -2 Z" fill="#ffbe76" opacity="0.3"/>
+          </g>
+        </svg>`
+      },
+      {
+        id: 'green-anthurium',
+        name: 'Green Anthurium',
+        svg: `<svg viewBox="0 0 80 100" width="100%" height="100%">
+          <path d="M 40 90 Q 42 60 40 40" stroke="#7d8c79" stroke-width="2" fill="none"/>
+          <path d="M 40 40 C 15 25, 20 -5, 40 18 C 60 -5, 65 25, 40 40 Z" fill="#d4efdf" stroke="#a9dfbf" stroke-width="1.5"/>
+          <path d="M 40 28 L 40 12" stroke="#f9e79f" stroke-width="3" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'pink-anthurium',
+        name: 'Pink Anthurium',
+        svg: `<svg viewBox="0 0 80 100" width="100%" height="100%">
+          <path d="M 40 90 Q 38 60 40 40" stroke="#7d8c79" stroke-width="2" fill="none"/>
+          <path d="M 40 40 C 15 25, 20 -5, 40 18 C 60 -5, 65 25, 40 40 Z" fill="#fadbd8" stroke="#f5b7b1" stroke-width="1.5"/>
+          <path d="M 40 28 L 40 12" stroke="#f9e79f" stroke-width="3" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'pink-lily',
+        name: 'Pink Lily',
+        svg: `<svg viewBox="0 0 80 100" width="100%" height="100%">
+          <path d="M 40 90 L 40 40" stroke="#7d8c79" stroke-width="2"/>
+          <g transform="translate(40,30)">
+            <ellipse cx="0" cy="-12" rx="4" ry="14" fill="#fadbd8"/>
+            <ellipse cx="-10" cy="5" rx="4" ry="14" transform="rotate(-60 -10 5)" fill="#fadbd8"/>
+            <ellipse cx="10" cy="5" rx="4" ry="14" transform="rotate(60 10 5)" fill="#fadbd8"/>
+            <ellipse cx="-8" cy="-8" rx="3.5" ry="12" transform="rotate(-30 -8 -8)" fill="#f5b7b1"/>
+            <ellipse cx="8" cy="-8" rx="3.5" ry="12" transform="rotate(30 8 -8)" fill="#f5b7b1"/>
+            <ellipse cx="0" cy="8" rx="3.5" ry="12" fill="#f5b7b1"/>
+            <line x1="0" y1="0" x2="-4" y2="-8" stroke="#7d8c79" stroke-width="1"/>
+            <line x1="0" y1="0" x2="4" y2="-8" stroke="#7d8c79" stroke-width="1"/>
+            <circle cx="-4" cy="-8" r="1.5" fill="#b03a2e"/>
+            <circle cx="4" cy="-8" r="1.5" fill="#b03a2e"/>
+          </g>
+        </svg>`
+      },
+      {
+        id: 'billy-button',
+        name: 'Billy Button',
+        svg: `<svg viewBox="0 0 80 100" width="100%" height="100%">
+          <path d="M 40 90 Q 38 55 40 25" stroke="#7d8c79" stroke-width="2" fill="none"/>
+          <circle cx="40" cy="22" r="12" fill="#f5b7b1"/>
+          <circle cx="40" cy="22" r="10" fill="#f1948a" opacity="0.6"/>
+        </svg>`
+      },
+      {
+        id: 'poppy',
+        name: 'Poppy',
+        svg: `<svg viewBox="0 0 80 100" width="100%" height="100%">
+          <path d="M 40 90 Q 42 60 40 38" stroke="#7d8c79" stroke-width="2" fill="none"/>
+          <g transform="translate(40,30)">
+            <circle cx="0" cy="0" r="14" fill="#f8c471"/>
+            <circle cx="-4" cy="-3" r="10" fill="#f0b27a" opacity="0.7"/>
+            <circle cx="4" cy="3" r="10" fill="#e59866" opacity="0.7"/>
+            <circle cx="0" cy="0" r="4" fill="#7e5109"/>
+          </g>
+        </svg>`
+      }
+    ];
+
+    // State Variables
+    let currentVaseId = 'classic-tall';
+    let placedElements = [];
+    let selectedId = null;
+    let highestZIndex = 20;
+
+    // DOM Elements
+    const vaseGrid = id('vase-grid');
+    const flowerGrid = id('flower-grid');
+    const canvas = id('canvas');
+    const rotateSlider = id('rotate-slider');
+    const scaleSlider = id('scale-slider');
+    const btnForward = id('btn-forward');
+    const btnBackward = id('btn-backward');
+    const btnDelete = id('btn-delete');
+    const btnClear = id('btn-clear');
+
+    function id(name) { return document.getElementById(name); }
+
+    // Initialize Vases List
+    function initVases() {
+      vaseGrid.innerHTML = '';
+      VASES.forEach(vase => {
+        const card = document.createElement('div');
+        card.className = `selectable-card ${vase.id === currentVaseId ? 'active-vase' : ''}`;
+        card.innerHTML = `${vase.svg}<span>${vase.name}</span>`;
+        card.addEventListener('click', () => selectVaseOption(vase.id));
+        vaseGrid.appendChild(card);
+      });
+    }
+
+    function selectVaseOption(vaseId) {
+      currentVaseId = vaseId;
+      initVases();
+      
+      // Update existing vase on canvas or create a new one
+      const vaseData = VASES.find(v => v.id === vaseId);
+      let activeVase = placedElements.find(e => e.isVase);
+
+      if (activeVase) {
+        activeVase.width = vaseData.width;
+        activeVase.height = vaseData.height;
+        const el = document.getElementById(activeVase.id);
+        el.style.width = `${vaseData.width}px`;
+        el.style.height = `${vaseData.height}px`;
+        el.innerHTML = vaseData.svg;
+        updateElementTransform(activeVase);
+      } else {
+        createVaseOnCanvas(vaseData);
+      }
+    }
+
+    function createVaseOnCanvas(vaseData) {
+      const rect = canvas.getBoundingClientRect();
+      const x = (rect.width / 2) - (vaseData.width / 2);
+      const y = rect.height - vaseData.height - 40;
+
+      const elementData = {
+        id: 'vase-element',
+        isVase: true,
+        width: vaseData.width,
+        height: vaseData.height,
+        x,
+        y,
+        rotation: 0,
+        scale: 1,
+        zIndex: 50
+      };
+
+      placedElements.push(elementData);
+      renderCanvasElement(elementData, vaseData.svg);
+    }
+
+    // Init Flower Options
+    FLOWERS.forEach(flower => {
+      const card = document.createElement('div');
+      card.className = 'selectable-card';
+      card.innerHTML = `${flower.svg}<span>${flower.name}</span>`;
+      
+      card.addEventListener('click', () => addFlowerToCanvas(flower));
+
+      card.draggable = true;
+      card.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', flower.id);
+      });
+
+      flowerGrid.appendChild(card);
+    });
+
+    // Handle Drag & Drop onto Canvas
+    canvas.addEventListener('dragover', (e) => e.preventDefault());
+    canvas.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const flowerId = e.dataTransfer.getData('text/plain');
+      const flower = FLOWERS.find(f => f.id === flowerId);
+      if (flower) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left - 75;
+        const y = e.clientY - rect.top - 100;
+        addFlowerToCanvas(flower, x, y);
+      }
+    });
+
+    // Add Flower Element
+    function addFlowerToCanvas(flower, x, y) {
+      highestZIndex++;
+      const rect = canvas.getBoundingClientRect();
+      if (x === undefined) x = (rect.width / 2) - 75;
+      if (y === undefined) y = (rect.height / 3);
+
+      const id = 'item-' + Date.now();
+      const elementData = {
+        id,
+        isVase: false,
+        width: 150, // Increased flower base dimensions
+        height: 200,
+        x,
+        y,
+        rotation: 0,
+        scale: 1,
+        zIndex: highestZIndex
+      };
+
+      placedElements.push(elementData);
+      renderCanvasElement(elementData, flower.svg);
+    }
+
+    // Render Canvas Interactive Element
+    function renderCanvasElement(elementData, svgContent) {
+      const el = document.createElement('div');
+      el.className = 'canvas-element';
+      el.id = elementData.id;
+      el.style.width = `${elementData.width}px`;
+      el.style.height = `${elementData.height}px`;
+      el.innerHTML = svgContent;
+
+      canvas.appendChild(el);
+      updateElementTransform(elementData);
+
+      // Mouse Drag Interaction
+      let isDragging = false;
+      let startX, startY;
+
+      el.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        selectElement(elementData.id);
+        isDragging = true;
+        startX = e.clientX - elementData.x;
+        startY = e.clientY - elementData.y;
+
+        const onMouseMove = (moveEvent) => {
+          if (!isDragging) return;
+          elementData.x = moveEvent.clientX - startX;
+          elementData.y = moveEvent.clientY - startY;
+          updateElementTransform(elementData);
+        };
+
+        const onMouseUp = () => {
+          isDragging = false;
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onMouseUp);
+        };
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+      });
+
+      selectElement(elementData.id);
+    }
+
+    // Select Element
+    function selectElement(id) {
+      selectedId = id;
+      document.querySelectorAll('.canvas-element').forEach(el => {
+        el.classList.toggle('selected', el.id === id);
+      });
+
+      const item = placedElements.find(e => e.id === id);
+      if (item) {
+        rotateSlider.disabled = false;
+        scaleSlider.disabled = false;
+        btnForward.disabled = false;
+        btnBackward.disabled = false;
+        btnDelete.disabled = item.isVase; // Don't delete vase with delete button
+
+        rotateSlider.value = item.rotation;
+        scaleSlider.value = item.scale;
+      } else {
+        disableControls();
+      }
+    }
+
+    // Deselect Element
+    canvas.addEventListener('click', (e) => {
+      if (e.target === canvas) {
+        selectedId = null;
+        document.querySelectorAll('.canvas-element').forEach(el => el.classList.remove('selected'));
+        disableControls();
+      }
+    });
+
+    function disableControls() {
+      rotateSlider.disabled = true;
+      scaleSlider.disabled = true;
+      btnForward.disabled = true;
+      btnBackward.disabled = true;
+      btnDelete.disabled = true;
+    }
+
+    function updateElementTransform(data) {
+      const el = document.getElementById(data.id);
+      if (el) {
+        el.style.left = `${data.x}px`;
+        el.style.top = `${data.y}px`;
+        el.style.transform = `rotate(${data.rotation}deg) scale(${data.scale})`;
+        el.style.zIndex = data.zIndex;
+      }
+    }
+
+    // Control Listeners
+    rotateSlider.addEventListener('input', (e) => {
+      const item = placedElements.find(e => e.id === selectedId);
+      if (item) {
+        item.rotation = e.target.value;
+        updateElementTransform(item);
+      }
+    });
+
+    scaleSlider.addEventListener('input', (e) => {
+      const item = placedElements.find(e => e.id === selectedId);
+      if (item) {
+        item.scale = e.target.value;
+        updateElementTransform(item);
+      }
+    });
+
+    btnForward.addEventListener('click', () => {
+      const item = placedElements.find(e => e.id === selectedId);
+      if (item) {
+        item.zIndex += 1;
+        updateElementTransform(item);
+      }
+    });
+
+    btnBackward.addEventListener('click', () => {
+      const item = placedElements.find(e => e.id === selectedId);
+      if (item) {
+        item.zIndex = Math.max(1, item.zIndex - 1);
+        updateElementTransform(item);
+      }
+    });
+
+    btnDelete.addEventListener('click', () => {
+      if (!selectedId) return;
+      const item = placedElements.find(e => e.id === selectedId);
+      if (item && !item.isVase) {
+        const el = document.getElementById(selectedId);
+        if (el) el.remove();
+        placedElements = placedElements.filter(e => e.id !== selectedId);
+        selectedId = null;
+        disableControls();
+      }
+    });
+
+    btnClear.addEventListener('click', () => {
+      placedElements.forEach(item => {
+        const el = document.getElementById(item.id);
+        if (el) el.remove();
+      });
+      placedElements = [];
+      selectedId = null;
+      disableControls();
+      createVaseOnCanvas(VASES.find(v => v.id === currentVaseId));
+    });
+
+    // Start App & Spawn Initial Vase
+    initVases();
+    createVaseOnCanvas(VASES[0]);
+  </script>
+</body>
+</html>
